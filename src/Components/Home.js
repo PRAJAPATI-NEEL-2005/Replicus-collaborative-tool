@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Container, Row, Col, Card, Form, Button } from "react-bootstrap";
 import {v4 as uuidV4} from "uuid";
-
+import toast from "react-hot-toast";
 function Home() {
   const [roomId, setRoomId] = useState("");
   const [username, setUsername] = useState("");
@@ -15,6 +15,7 @@ function Home() {
     const id = uuidV4();
     setRoomId(id);
     console.log(`Created room: ${id}`);
+    toast.success("Created a new room");
   };
 
   return (
