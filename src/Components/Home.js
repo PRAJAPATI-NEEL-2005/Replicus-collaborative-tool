@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Container, Row, Col, Card, Form, Button } from "react-bootstrap";
+import {v4 as uuidV4} from "uuid";
 
 function Home() {
   const [roomId, setRoomId] = useState("");
@@ -9,9 +10,11 @@ function Home() {
     console.log(`Joining room: ${roomId} as ${username}`);
   };
 
-  const handleCreate = () => {
-    const newRoomId = Math.random().toString(36).substring(2, 8);
-    console.log(`Creating a new room with ID: ${newRoomId} as ${username}`);
+  const handleCreate = (e) => {
+    e.preventDefault();
+    const id = uuidV4();
+    setRoomId(id);
+    console.log(`Created room: ${id}`);
   };
 
   return (
