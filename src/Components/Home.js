@@ -2,11 +2,24 @@ import React, { useState } from "react";
 import { Container, Row, Col, Card, Form, Button } from "react-bootstrap";
 import {v4 as uuidV4} from "uuid";
 import toast from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
+
 function Home() {
   const [roomId, setRoomId] = useState("");
   const [username, setUsername] = useState("");
-
+  const navigate = useNavigate(); 
+  
   const handleJoin = () => {
+    if(!roomId || !username){
+      toast.error("Room ID and Username are required");
+      return;
+    }
+    // Redirect to editor page
+    navigate(`/editor/${roomId}`, {
+      state: {
+        username,
+      },
+    });
     console.log(`Joining room: ${roomId} as ${username}`);
   };
 
@@ -31,6 +44,7 @@ function Home() {
           minHeight: "100vh",
           background: "linear-gradient(135deg, #fdfbfb, #ebedee)",
           display: "flex",
+          flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
           padding: "20px",
@@ -39,7 +53,7 @@ function Home() {
       >
         <Container>
           <Row className="justify-content-center">
-            <Col xs={12} sm={10} md={8} lg={6} xl={5}>
+            <Col xs={12} sm={8} md={6} lg={5} xl={4}>
               <Card
                 className="text-center shadow-lg border-0"
                 style={{
@@ -59,15 +73,15 @@ function Home() {
                   e.currentTarget.style.boxShadow = "none";
                 }}
               >
-                <Card.Body className="p-4 p-md-5">
-                 <h2 className="fw-bold mb-2" style={{ color: "#42a5f5", fontSize: "2.5rem" }}>
+                <Card.Body className="p-3 p-md-4">
+                  <h2 className="fw-bold mb-2" style={{ color: "#42a5f5", fontSize: "2rem" }}>
                     🚀 Replicus
                   </h2>
-                  <p className="text-muted mb-4" style={{ fontSize: "1.1rem" }}>
+                  <p className="text-muted mb-3" style={{ fontSize: "0.95rem" }}>
                     A real-time collaborative code editor
                   </p>
 
-                  <Form className="mt-4">
+                  <Form className="mt-3">
                     <Form.Group className="mb-3">
                       <Form.Control
                         type="text"
@@ -80,7 +94,8 @@ function Home() {
                           border: "1px solid #ddd",
                           color: "#333",
                           borderRadius: "10px",
-                          padding: "15px",
+                          padding: "12px",
+                          fontSize: "0.95rem",
                           transition:
                             "border 0.3s ease-in-out, box-shadow 0.3s ease",
                         }}
@@ -96,7 +111,7 @@ function Home() {
                       />
                     </Form.Group>
 
-                    <Form.Group className="mb-4">
+                    <Form.Group className="mb-3">
                       <Form.Control
                         type="text"
                         placeholder="👤 Enter Username"
@@ -108,7 +123,8 @@ function Home() {
                           border: "1px solid #ddd",
                           color: "#333",
                           borderRadius: "10px",
-                          padding: "15px",
+                          padding: "12px",
+                          fontSize: "0.95rem",
                           transition:
                             "border 0.3s ease-in-out, box-shadow 0.3s ease",
                         }}
@@ -121,19 +137,24 @@ function Home() {
                           e.target.style.border = "1px solid #ddd";
                           e.target.style.boxShadow = "none";
                         }}
+                        onKeyUp={(e) => {
+                          if (e.key === "Enter") {
+                            handleJoin();
+                          }
+                        }}
                       />
                     </Form.Group>
 
-                    <div className="d-grid gap-3">
+                    <div className="d-grid gap-2">
                       <Button
                         variant="primary"
                         onClick={handleJoin}
-                        disabled={!roomId || !username}
                         className="w-100 rounded-pill fw-bold"
                         style={{
                           background: "linear-gradient(90deg, #1976d2, #42a5f5)",
                           border: "none",
-                          padding: "12px",
+                          padding: "10px",
+                          fontSize: "0.95rem",
                           transition: "transform 0.2s ease-in-out, box-shadow 0.2s",
                         }}
                         onMouseEnter={(e) => {
@@ -148,7 +169,7 @@ function Home() {
                       >
                         Join Room
                       </Button>
-                      <div className="text-muted my-2">OR</div>
+                      <div className="text-muted my-1" style={{ fontSize: "0.85rem" }}>OR</div>
                       <Button
                         variant="outline-primary"
                         onClick={handleCreate}
@@ -156,7 +177,8 @@ function Home() {
                         style={{
                           color: "#1976d2",
                           border: "1px solid #1976d2",
-                          padding: "12px",
+                          padding: "10px",
+                          fontSize: "0.95rem",
                           background: "transparent",
                           transition: "transform 0.2s ease-in-out, box-shadow 0.2s, background 0.2s",
                         }}
@@ -179,6 +201,18 @@ function Home() {
                   </Form>
                 </Card.Body>
               </Card>
+              
+              {/* Footer */}
+              <div 
+                className="text-center mt-4"
+                style={{
+                  color: "#666",
+                  fontSize: "0.9rem",
+                  fontWeight: "500"
+                }}
+              >
+                Made with ❤️ by Neel
+              </div>
             </Col>
           </Row>
         </Container>
