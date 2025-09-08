@@ -2,9 +2,16 @@ import './App.css';
 import { BrowserRouter,Routes,Route } from 'react-router-dom';
 import Home from './Components/Home';
 import Editorpage from './Components/Editorpage';
+import {Toaster} from 'react-hot-toast';
 function App() {
   return (
     <>
+    <div>
+<Toaster
+  position="top-left"
+  reverseOrder={false}
+/>
+    </div>
     <BrowserRouter>
       <Routes>
         <Route path='/' element={<Home/>}/> 
