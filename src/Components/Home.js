@@ -3,7 +3,7 @@ import { Container, Row, Col, Card, Form, Button } from "react-bootstrap";
 import {v4 as uuidV4} from "uuid";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
-
+import logo from "./logo.png"
 function Home() {
   const [roomId, setRoomId] = useState("");
   const [username, setUsername] = useState("");
@@ -74,10 +74,16 @@ function Home() {
                 }}
               >
                 <Card.Body className="p-3 p-md-4">
-                  <h2 className="fw-bold mb-2" style={{ color: "#42a5f5", fontSize: "2rem" }}>
-                    🚀 Replicus
-                  </h2>
-                  <p className="text-muted mb-3" style={{ fontSize: "0.95rem" }}>
+                               <img
+    src={logo}
+    alt="Replicus Logo"
+    style={{
+      width: "200px",
+      height: "200px"
+    }}
+  />
+                  
+                  <p className="text-strong mb-3" style={{ fontSize: "1.15rem",fontFamily: "'Poppins', cursive", fontWeight: "600", color: "#1976d2" }}>
                     A real-time collaborative code editor
                   </p>
 
