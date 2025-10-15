@@ -2,11 +2,7 @@ import React, { useState } from "react";
 import Editor from "./Editor";  
 import { useParams } from "react-router-dom";
 import Client from "./Client";
-
-
-
-
-
+import Logo from "./logo.png";
 
 // Main Editorpage Component
 const Editorpage = () => {
@@ -54,20 +50,21 @@ console.log(greet("World"));
       >
         <div className="p-4 d-flex flex-column h-100">
           {/* Logo */}
-          <div className="text-center mb-4">
-            <div
-              className="mx-auto d-flex align-items-center justify-content-center rounded-3"
-              style={{
-                width: "100px",
-                height: "100px",
-                background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-              }}
-            >
-              <span className="text-white fw-bold" style={{ fontSize: "48px" }}>
-                {"</>"}
-              </span>
+            <div className="text-center mb-4">
+                <img
+                  src={Logo}
+                  alt="logo"
+                  className="rounded"
+                  style={{
+                    width: "150px",
+                    height: "150px",
+                    width: "120px",
+                    height: "120px",
+                    objectFit: "cover",
+                  }}
+                />
+              
             </div>
-          </div>
 
           <div className="text-center mb-3">
             <h6 className="text-muted mb-1">Room ID</h6>
@@ -117,14 +114,12 @@ console.log(greet("World"));
 
       {/* Editor */}
       <div className="flex-grow-1 d-flex flex-column">
-        <div className="bg-dark text-white px-4 py-2 d-flex align-items-center justify-content-between border-bottom">
-          <span className="fw-medium">editor.js</span>
           <div className="d-flex gap-3 align-items-center">
             <small className="text-muted">
               Lines: {code.split('\n').length} | Characters: {code.length}
             </small>
           </div>
-        </div>
+        
         <div className="flex-grow-1 position-relative">
           <Editor code={code} setCode={setCode} />
         </div>
