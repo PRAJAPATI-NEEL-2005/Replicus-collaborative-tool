@@ -17,6 +17,7 @@ const Editor = ({ code, setCode, language: initialLanguage = 'javascript' }) => 
   const editorRef = useRef(null);
   const viewRef = useRef(null);
   const [language, setLanguage] = useState(initialLanguage);
+  const [shouldLoadExample, setShouldLoadExample] = useState(false);
 
   useEffect(() => {
     if (!editorRef.current || viewRef.current) return;
@@ -69,6 +70,14 @@ const Editor = ({ code, setCode, language: initialLanguage = 'javascript' }) => 
     }
   }, [language]);
 
+  // Load example after language change
+  useEffect(() => {
+    if (shouldLoadExample && languageExamples[language]) {
+      setCode(languageExamples[language]);
+      setShouldLoadExample(false);
+    }
+  }, [language, shouldLoadExample]);
+
   // Update code externally
   useEffect(() => {
     if (viewRef.current) {
@@ -105,6 +114,7 @@ const Editor = ({ code, setCode, language: initialLanguage = 'javascript' }) => 
 
   const handleLanguageChange = (e) => {
     setLanguage(e.target.value);
+    setShouldLoadExample(true);
   };
 
   const languageExamples = {
@@ -244,8 +254,8 @@ echo fibonacci(10);
       {/* Language Toolbar */}
       <div className="bg-light border-bottom px-3 py-2 d-flex align-items-center justify-content-between">
         <div className="d-flex align-items-center gap-3">
-          <span className="fw-medium small">editor.{getFileExtension(language)}</span>
-          <span className="badge bg-primary">{language.toUpperCase()}</span>
+          <span className="badge bg-primary">editor.{getFileExtension(language)}</span>
+          <span className="badge bg-secondary">{language.toUpperCase()}</span>
         </div>
         <div className="d-flex align-items-center gap-2">
           <select 
@@ -266,12 +276,6 @@ echo fibonacci(10);
             <option value="sql">SQL</option>
             <option value="php">PHP</option>
           </select>
-          <button
-            className="btn btn-sm btn-outline-secondary"
-            onClick={loadExample}
-          >
-            Load Example
-          </button>
         </div>
       </div>
 
