@@ -1,113 +1,139 @@
-import React, { useState, useEffect } from "react";
-import { Container, Row, Col, Card, Button, ListGroup } from "react-bootstrap";
-import Logo from "./logo.png";
+import React, { useState } from "react";
+import Editor from "./Editor";  
+import { useParams } from "react-router-dom";
 import Client from "./Client";
-import Editor from "./Editor";
 
 
 
 
+
+
+// Main Editorpage Component
 const Editorpage = () => {
+  const { roomId } = useParams(); 
   const [clients, setClients] = useState([
     { socketId: 1, username: "Alice" },
     { socketId: 2, username: "Bob" },
     { socketId: 3, username: "Charlie" },
-      { socketId: 1, username: "Alice" },
-    { socketId: 2, username: "Bob" },
-    { socketId: 3, username: "Charlie" },
-      { socketId: 1, username: "Alice" },
-    { socketId: 2, username: "Bob" },
-    { socketId: 3, username: "Charlie" },
-      { socketId: 1, username: "Alice" },
-    { socketId: 2, username: "Bob" },
-    { socketId: 3, username: "Charlie" },
+    { socketId: 4, username: "Diana" },
+    { socketId: 5, username: "Ethan" },
   ]);
 
+  const [code, setCode] = useState(`// Welcome to the collaborative code editor!
+// Start writing your code here.
 
-  const roomId = "YOUR_ROOM_ID";
+function greet(name) {
+  return "Hello, " + name + "!";
+}
+
+console.log(greet("World"));
+`);
+
+  const [copied, setCopied] = useState(false);
+  
 
   const copyRoomId = () => {
-    
+    navigator.clipboard.writeText(roomId).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
   };
 
   const leaveRoom = () => {
-    // Implement leave room functionality
+    if (window.confirm("Are you sure you want to leave this room?")) {
+      window.location.reload();
+    }
   };
 
-
-
   return (
-    <Container fluid className="p-0 bg-white text-dark vh-100">
-     
-      <Row className="g-0 h-100">
-        {/* Sidebar */}
-        <Col md={3} className="d-flex flex-column bg-light border-end p-3 h-100 shadow-sm">
-          <Card className="shadow-sm flex-grow-1 bg-white border-0 h-100">
-            <Card.Body className="d-flex flex-column h-100">
-              {/* Logo */}
-              <div className="text-center mb-4">
-                <img
-                  src={Logo}
-                  alt="logo"
-                  className="rounded"
-                  style={{
-                    width: "120px",
-                    height: "120px",
-                    objectFit: "cover",
-                  }}
-                />
-              </div>
+    <div className="d-flex vh-100 bg-light">
+      {/* Sidebar */}
+      <div 
+        className="d-flex flex-column bg-white border-end shadow-sm"
+        style={{ width: "280px" }}
+      >
+        <div className="p-4 d-flex flex-column h-100">
+          {/* Logo */}
+          <div className="text-center mb-4">
+            <div
+              className="mx-auto d-flex align-items-center justify-content-center rounded-3"
+              style={{
+                width: "100px",
+                height: "100px",
+                background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+              }}
+            >
+              <span className="text-white fw-bold" style={{ fontSize: "48px" }}>
+                {"</>"}
+              </span>
+            </div>
+          </div>
 
-              <h5 className="text-center text-secondary mb-3">
-                Connected Users
-              </h5>
+          <div className="text-center mb-3">
+            <h6 className="text-muted mb-1">Room ID</h6>
+            <code className="bg-light px-2 py-1 rounded" style={{ fontSize: "12px" }}>
+              {roomId}
+            </code>
+          </div>
 
-              {/* Clients list */}
-              <ListGroup className="mb-3 flex-grow-1 overflow-auto">
-                {clients.map((client) => (
-                  <ListGroup.Item
-                    key={client.socketId}
-                    className="border-0 bg-light"
-                  >
-                    <Client username={client.username} />
-                  </ListGroup.Item>
-                ))}
-              </ListGroup>
+          <h6 className="text-muted mb-3 text-center">
+            Connected Users ({clients.length})
+          </h6>
 
-              {/* Buttons */}
-              <div className="d-flex flex-column gap-2 mt-auto">
-                <Button
-                  variant="outline-primary"
-                  className="w-100 py-2"
-                  onClick={copyRoomId}
+          {/* Clients list */}
+          <div 
+            className="flex-grow-1 overflow-auto mb-3"
+            style={{ maxHeight: "calc(100vh - 400px)" }}
+          >
+            <div className="d-flex flex-column gap-2">
+              {clients.map((client) => (
+                <div
+                  key={client.socketId}
+                  className="p-2 rounded bg-light"
                 >
-                  Copy ROOM ID
-                </Button>
-                <Button
-                  variant="outline-danger"
-                  className="w-100 py-2"
-                  onClick={leaveRoom}
-                >
-                  Leave
-                </Button>
-              </div>
-            </Card.Body>
-          </Card>
-        </Col>
+                  <Client username={client.username} />
+                </div>
+              ))}
+            </div>
+          </div>
 
-        {/* Editor */}
-        <Col md={9} className="d-flex flex-column h-100">
-          <Card className="shadow-sm h-100 bg-white border-0 rounded-0">
-            <Card.Body className="p-0 h-100 d-flex">
-              <Editor />
-            </Card.Body>
-          </Card>
-        </Col>
-      </Row>
-    </Container>
+          {/* Buttons */}
+          <div className="d-flex flex-column gap-2 mt-auto">
+            <button
+              className="btn btn-outline-primary w-100"
+              onClick={copyRoomId}
+            >
+              {copied ? "✓ Copied!" : "Copy Room ID"}
+            </button>
+            <button
+              className="btn btn-outline-danger w-100"
+              onClick={leaveRoom}
+            >
+              Leave Room
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Editor */}
+      <div className="flex-grow-1 d-flex flex-column">
+        <div className="bg-dark text-white px-4 py-2 d-flex align-items-center justify-content-between border-bottom">
+          <span className="fw-medium">editor.js</span>
+          <div className="d-flex gap-3 align-items-center">
+            <small className="text-muted">
+              Lines: {code.split('\n').length} | Characters: {code.length}
+            </small>
+          </div>
+        </div>
+        <div className="flex-grow-1 position-relative">
+          <Editor code={code} setCode={setCode} />
+        </div>
+      </div>
+    </div>
   );
 };
 
+// App Component
 export default function App() {
   return (
     <>
@@ -116,9 +142,7 @@ export default function App() {
         href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
         crossOrigin="anonymous"
       />
-      <React.StrictMode>
-        <Editorpage />
-      </React.StrictMode>
+      <Editorpage />
     </>
   );
 }
