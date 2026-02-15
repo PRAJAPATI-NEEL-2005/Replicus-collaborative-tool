@@ -21,14 +21,17 @@ const Editorpage = () => {
   const [language, setLanguage] = useState("javascript");
 
   const extensionMap = {
-    javascript: "js",
-    python: "py",
-    cpp: "cpp",
-    java: "java",
-    html: "html",
-    css: "css",
-    json: "json",
-    plaintext: "txt",
+   javascript: "js",
+  typescript: "ts",
+  python: "py",
+  java: "java",
+  cpp: "cpp",
+  html: "html",
+  css: "css",
+  json: "json",
+  xml: "xml",
+  sql: "sql",
+  php: "php",
   };
 
   const [code, setCode] = useState(`// Welcome to the collaborative code editor!
@@ -183,7 +186,7 @@ const saveFile = async () => {
 
 
   return (
-    <div className="d-flex vh-100 bg-light">
+    <div className="d-flex vh-100 bg-light" style={{ overflow:"inherit" }}>
       {/* Sidebar */}
       <div
         className="d-flex flex-column bg-white border-end shadow-sm"

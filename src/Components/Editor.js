@@ -119,50 +119,60 @@ const Editor = ({ code, setCode, language, setLanguage }) => {
     return extensions[lang] || "txt";
   };
 
-  return (
-    <div className="d-flex flex-column w-100 h-100">
+ return (
+  <div className="d-flex flex-column w-100 h-100" style={{ overflow: "hidden" }}>
 
-      {/* Toolbar */}
-      <div className="bg-light border-bottom px-3 py-2 d-flex justify-content-between">
+    {/* Toolbar */}
+    <div className="bg-light border-bottom px-3 py-2 d-flex justify-content-between flex-shrink-0">
 
-        <div className="d-flex gap-2">
-          <span className="badge bg-primary">
-            editor.{getFileExtension(language)}
-          </span>
+      <div className="d-flex gap-2">
+        <span className="badge bg-primary">
+          editor.{getFileExtension(language)}
+        </span>
 
-          <span className="badge bg-secondary">
-            {language.toUpperCase()}
-          </span>
-        </div>
-
-        <select
-          className="form-select form-select-sm"
-          style={{ width: "150px" }}
-          value={language}
-          onChange={(e) => setLanguage(e.target.value)}
-        >
-          <option value="javascript">JavaScript</option>
-          <option value="typescript">TypeScript</option>
-          <option value="python">Python</option>
-          <option value="java">Java</option>
-          <option value="cpp">C++</option>
-          <option value="html">HTML</option>
-          <option value="css">CSS</option>
-          <option value="json">JSON</option>
-          <option value="xml">XML</option>
-          <option value="sql">SQL</option>
-          <option value="php">PHP</option>
-        </select>
+        <span className="badge bg-secondary">
+          {language.toUpperCase()}
+        </span>
       </div>
 
-      {/* Editor */}
+      <select
+        className="form-select form-select-sm"
+        style={{ width: "150px" }}
+        value={language}
+        onChange={(e) => setLanguage(e.target.value)}
+      >
+        <option value="javascript">JavaScript</option>
+        <option value="typescript">TypeScript</option>
+        <option value="python">Python</option>
+        <option value="java">Java</option>
+        <option value="cpp">C++</option>
+        <option value="html">HTML</option>
+        <option value="css">CSS</option>
+        <option value="json">JSON</option>
+        <option value="xml">XML</option>
+        <option value="sql">SQL</option>
+        <option value="php">PHP</option>
+      </select>
+    </div>
+
+    {/* ⭐ Scrollable Editor ONLY */}
+    <div
+      className="flex-grow-1"
+      style={{
+        overflow: "auto",
+        minHeight: 0,   // ⭐ VERY IMPORTANT FIX
+      }}
+    >
       <div
         ref={editorRef}
-        className="flex-grow-1 overflow-auto"
-        style={{ fontSize: "14px" }}
+        style={{
+          height: "100%",
+          fontSize: "14px",
+        }}
       />
     </div>
-  );
+  </div>
+);
 };
 
 export default Editor;
