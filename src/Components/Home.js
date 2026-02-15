@@ -17,7 +17,7 @@ function Home() {
     // Redirect to editor page
     navigate(`/editor/${roomId}`, {
       state: {
-        username,
+        username
       },
     });
     console.log(`Joining room: ${roomId} as ${username}`);

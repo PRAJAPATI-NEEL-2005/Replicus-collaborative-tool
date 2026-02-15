@@ -1,18 +1,35 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Editor from "./Editor";  
 import { useParams } from "react-router-dom";
 import Client from "./Client";
 import Logo from "./logo.png";
-
+import { initsocket } from "../socket";
+import Actions from "../Actions";
+import { useLocation } from "react-router-dom";
 // Main Editorpage Component
 const Editorpage = () => {
   const { roomId } = useParams(); 
+  const location = useLocation();
+  const { username } = location.state || { username: "Anonymous" };
+  const socketRef=React.useRef(null);
+ useEffect(()=>{
+ const init=async()=>{
+   
+    socketRef.current=await initsocket(); 
+    socketRef.current.emit(Actions.JOIN,{roomId,username});
+
+
+  }   
+
+
+ })
   const [clients, setClients] = useState([
     { socketId: 1, username: "Alice" },
     { socketId: 2, username: "Bob" },
     { socketId: 3, username: "Charlie" },
     { socketId: 4, username: "Diana" },
     { socketId: 5, username: "Ethan" },
+   
   ]);
 
   const [code, setCode] = useState(`// Welcome to the collaborative code editor!
@@ -37,7 +54,7 @@ console.log(greet("World"));
 
   const leaveRoom = () => {
     if (window.confirm("Are you sure you want to leave this room?")) {
-      window.location.reload();
+       window.history.back();
     }
   };
 
