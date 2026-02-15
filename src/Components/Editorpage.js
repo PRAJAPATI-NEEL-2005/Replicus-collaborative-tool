@@ -18,6 +18,18 @@ const Editorpage = () => {
   const reactNavigator = useNavigate();
 
   const [clients, setClients] = useState([]);
+  const [language, setLanguage] = useState("javascript");
+
+  const extensionMap = {
+    javascript: "js",
+    python: "py",
+    cpp: "cpp",
+    java: "java",
+    html: "html",
+    css: "css",
+    json: "json",
+    plaintext: "txt",
+  };
 
   const [code, setCode] = useState(`// Welcome to the collaborative code editor!
 // Start writing your code here.
@@ -136,6 +148,40 @@ console.log(greet("World"));
     }
   };
 
+
+const saveFile = async () => {
+    try {
+      const ext = extensionMap[language] || "txt";
+
+      const options = {
+        suggestedName: `code.${ext}`,
+        types: [
+          {
+            description: `${language} file`,
+            accept: {
+              "text/plain": [`.${ext}`],
+            },
+          },
+        ],
+      };
+
+      const handle = await window.showSaveFilePicker(options);
+      const writable = await handle.createWritable();
+      await writable.write(code);
+      await writable.close();
+
+      toast.success("File saved successfully!");
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+
+
+
+
+
+
   return (
     <div className="d-flex vh-100 bg-light">
       {/* Sidebar */}
@@ -202,6 +248,12 @@ console.log(greet("World"));
             >
               Leave Room
             </button>
+            <button
+              className="btn btn-success"
+              onClick={saveFile}
+            >
+              Save File
+            </button>
           </div>
         </div>
       </div>
@@ -215,7 +267,12 @@ console.log(greet("World"));
         </div>
 
         <div className="flex-grow-1 position-relative">
-          <Editor code={code} setCode={handleCodeChange} />
+         <Editor
+  code={code}
+  setCode={handleCodeChange}
+  language={language}
+  setLanguage={setLanguage}
+/>
         </div>
       </div>
     </div>
