@@ -1,81 +1,23 @@
-import React, { useEffect, useState,useRef } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import Editor from "./Editor";
 import { Navigate, useParams } from "react-router-dom";
 import Client from "./Client";
 import Logo from "./logo.png";
 import { initsocket } from "../socket";
 import Actions from "../Actions";
-import { useLocation,useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
-// Main Editorpage Component
+
 const Editorpage = () => {
   const { roomId } = useParams();
   const location = useLocation();
   const { username } = location.state || { username: "Anonymous" };
+
   const socketRef = useRef(null);
+  const codeRef = useRef(null); // ⭐ For latest code reference
   const reactNavigator = useNavigate();
 
-
-  useEffect(() => {
-    const init = async () => {
-       if (socketRef.current) return;
-      socketRef.current = await initsocket();
-      socketRef.current.on("connect_error",(err)=>handleErrors(err));
-      socketRef.current.on("connect_failed",(err)=>handleErrors(err));
-
-      function handleErrors(e){
-        console.log("socket error", e);
-        toast.error("Socket connection failed, try again later.");
-        reactNavigator("/");
-      }
-
-      socketRef.current.emit(Actions.JOIN, { roomId, username });
-
-        // Listen for JOINED event from the server
-      socketRef.current.on(Actions.JOINED, ({ clients, username, socketId }) => {
-        if (username !== location.state.username) {
-          toast.success(`${username} joined the room.`);
-        }
-        setClients(clients);
-      
-      });
-       // Listen for DISCONNECTED event from the server
-       socketRef.current.on(Actions.DISCONNECTED, ({ socketId, username }) => {
-        toast.success(`${username} left the room.`);
-        setClients((prev) => {
-          return prev.filter((client) => client.socketId !== socketId);
-        });
-      });
-
-
-
-
-
-
-    };
-
-
-
-    init();
-
-    return()=>{
-      socketRef.current.off(Actions.JOINED);
-      socketRef.current.off(Actions.DISCONNECTED);  
-      socketRef.current.disconnect();
-
-
-    }
-
-
-
-  },[]);
-
-
-
-
-
-  const [clients, setClients] = useState([  ]);
-
+  const [clients, setClients] = useState([]);
 
   const [code, setCode] = useState(`// Welcome to the collaborative code editor!
 // Start writing your code here.
@@ -87,13 +29,102 @@ function greet(name) {
 console.log(greet("World"));
 `);
 
+  // ⭐ Always store latest code
+  useEffect(() => {
+    codeRef.current = code;
+  }, [code]);
+
+  useEffect(() => {
+    const init = async () => {
+      if (socketRef.current) return;
+
+      socketRef.current = await initsocket();
+
+      socketRef.current.on("connect_error", handleErrors);
+      socketRef.current.on("connect_failed", handleErrors);
+
+      function handleErrors(e) {
+        console.log("socket error", e);
+        toast.error("Socket connection failed, try again later.");
+        reactNavigator("/");
+      }
+
+      socketRef.current.emit(Actions.JOIN, { roomId, username });
+
+      // that is initial join event 
+      socketRef.current.on(
+        Actions.JOINED,
+        ({ clients, username, socketId }) => {
+          if (username !== location.state.username) {
+            toast.success(`${username} joined the room.`);
+          }
+
+          setClients(clients);
+
+          // if new user come then the current code sent to them
+          socketRef.current.emit(Actions.SYNC_CODE, {
+            code: codeRef.current,
+            socketId,
+          });
+        }
+      );
+
+      // if any user closes the room 
+      socketRef.current.on(
+        Actions.DISCONNECTED,
+        ({ socketId, username }) => {
+          toast.success(`${username} left the room.`);
+          setClients((prev) =>
+            prev.filter((client) => client.socketId !== socketId)
+          );
+        }
+      );
+
+      // other user changes the code that is received here
+      socketRef.current.on(Actions.CODE_CHANGE, ({ code }) => {
+        if (code !== null) {
+          setCode(code);
+        }
+      });
+
+      // initiallly when user join the room then the code is sent to them and received here
+      socketRef.current.on(Actions.SYNC_CODE, ({ code }) => {
+        if (code !== null) {
+          setCode(code);
+        }
+      });
+    };
+
+    init();
+
+    return () => {
+      socketRef.current?.off(Actions.JOINED);
+      socketRef.current?.off(Actions.DISCONNECTED);
+      socketRef.current?.off(Actions.CODE_CHANGE);
+      socketRef.current?.off(Actions.SYNC_CODE);
+      socketRef.current?.disconnect();
+    };
+  }, []);
+
+  // code typing occurs then code updates to new
+  const handleCodeChange = (newCode) => {
+    setCode(newCode);
+
+    socketRef.current?.emit(Actions.CODE_CHANGE, {
+      roomId,
+      code: newCode,
+    });
+  };
+
   const [copied, setCopied] = useState(false);
 
   const copyRoomId = () => {
+    
     navigator.clipboard.writeText(roomId).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     });
+    toast.success("Room ID copied to clipboard!");
   };
 
   const leaveRoom = () => {
@@ -181,7 +212,7 @@ console.log(greet("World"));
         </div>
 
         <div className="flex-grow-1 position-relative">
-          <Editor code={code} setCode={setCode} />
+          <Editor code={code} setCode={handleCodeChange} />
         </div>
       </div>
     </div>
