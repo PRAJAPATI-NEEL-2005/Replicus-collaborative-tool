@@ -17,10 +17,11 @@ function getAllConnectedClients(roomId) {
     })
   );
 }
-
+    // socket connection happend here
 io.on("connection", (socket) => {
   console.log("socket connected:", socket.id);
 
+  //event emitted when user join the room
   socket.on(Actions.JOIN, ({ roomId, username }) => {
     userSocketMap[socket.id] = username;
     socket.join(roomId);
@@ -36,12 +37,12 @@ io.on("connection", (socket) => {
     });
   });
 
-  // ⭐ Code Change Broadcast
+  // that event emmited when user changes the code and other user receive the code here
   socket.on(Actions.CODE_CHANGE, ({ roomId, code }) => {
     socket.in(roomId).emit(Actions.CODE_CHANGE, { code });
   });
 
-  // ⭐ Sync Code to specific user
+  //event emmited when user join the room and the code is sent to them here
   socket.on(Actions.SYNC_CODE, ({ socketId, code }) => {
     io.to(socketId).emit(Actions.SYNC_CODE, { code });
   });
