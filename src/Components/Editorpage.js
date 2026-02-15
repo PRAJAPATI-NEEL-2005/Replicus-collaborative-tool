@@ -119,12 +119,15 @@ console.log(greet("World"));
   const [copied, setCopied] = useState(false);
 
   const copyRoomId = () => {
+    try {
     
     navigator.clipboard.writeText(roomId).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     });
     toast.success("Room ID copied to clipboard!");
+  } catch (err) {
+    toast.error("Failed to copy Room ID.");}
   };
 
   const leaveRoom = () => {
