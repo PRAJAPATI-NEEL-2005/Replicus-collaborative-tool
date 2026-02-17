@@ -47,6 +47,20 @@ io.on("connection", (socket) => {
     io.to(socketId).emit(Actions.SYNC_CODE, { code });
   });
 
+    // ⭐ LANGUAGE CHANGE BROADCAST
+  socket.on(Actions.LANGUAGE_CHANGE, ({ roomId, language }) => {
+    socket.in(roomId).emit(Actions.LANGUAGE_CHANGE, { 
+      language ,
+      username: userSocketMap[socket.id], 
+
+    });
+  });
+
+  // ⭐ LANGUAGE SYNC FOR NEW USER
+  socket.on(Actions.SYNC_LANGUAGE, ({ socketId, language }) => {
+    io.to(socketId).emit(Actions.SYNC_LANGUAGE, { language });
+  });
+
   socket.on("disconnecting", () => {
     const rooms = [...socket.rooms];
 
