@@ -16,7 +16,7 @@ const Editorpage = () => {
   const socketRef = useRef(null);
   const codeRef = useRef(null); // ⭐ For latest code reference
   const reactNavigator = useNavigate();
-
+  const languageRef = useRef(null); // ⭐ For latest language reference
   const [clients, setClients] = useState([]);
   const [language, setLanguage] = useState("javascript");
 
@@ -48,6 +48,11 @@ console.log(greet("World"));
   useEffect(() => {
     codeRef.current = code;
   }, [code]);
+
+  //
+    useEffect(() => {
+    languageRef.current = language;
+  }, [language]);
 
   useEffect(() => {
     const init = async () => {
@@ -81,6 +86,14 @@ console.log(greet("World"));
             code: codeRef.current,
             socketId,
           });
+             // Sync Language
+        socketRef.current.emit(Actions.SYNC_LANGUAGE, {
+          socketId,
+          language: languageRef.current,
+        });
+
+
+
         }
       );
 
@@ -108,6 +121,17 @@ console.log(greet("World"));
           setCode(code);
         }
       });
+ // RECEIVE LANGUAGE CHANGE
+      socketRef.current.on(Actions.LANGUAGE_CHANGE, ({ language ,username}) => {
+        setLanguage(language);
+        toast.success(`${username} changed language to ${language}`);
+      });
+
+      // RECEIVE LANGUAGE SYNC
+      socketRef.current.on(Actions.SYNC_LANGUAGE, ({ language }) => {
+        setLanguage(language);
+      });
+
     };
 
     init();
@@ -117,6 +141,8 @@ console.log(greet("World"));
       socketRef.current?.off(Actions.DISCONNECTED);
       socketRef.current?.off(Actions.CODE_CHANGE);
       socketRef.current?.off(Actions.SYNC_CODE);
+        socketRef.current.off(Actions.LANGUAGE_CHANGE);
+      socketRef.current.off(Actions.SYNC_LANGUAGE);
       socketRef.current?.disconnect();
     };
   }, []);
@@ -178,7 +204,14 @@ const saveFile = async () => {
       console.log(err);
     }
   };
+ const handleLanguageChange = (newLang) => {
+    setLanguage(newLang);
 
+    socketRef.current.emit(Actions.LANGUAGE_CHANGE, {
+      roomId,
+      language: newLang,
+    });
+  };
 
 
 
@@ -275,6 +308,7 @@ const saveFile = async () => {
   setCode={handleCodeChange}
   language={language}
   setLanguage={setLanguage}
+  handleLanguageChange={handleLanguageChange} // Pass the new handler
 />
         </div>
       </div>
