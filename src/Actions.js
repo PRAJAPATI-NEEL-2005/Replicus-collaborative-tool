@@ -5,5 +5,7 @@ const Actions = {
     JOINED:'joined',
     DISCONNECTED:'disconnected',
     CODE_CHANGE:'code_change',
+    LANGUAGE_CHANGE:'language_change',
+    SYNC_LANGUAGE:'sync_language'
 };  
 module.exports = Actions;
