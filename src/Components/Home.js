@@ -217,7 +217,7 @@ function Home() {
                   fontWeight: "500"
                 }}
               >
-                Made with ❤️ by Neel
+              
               </div>
             </Col>
           </Row>

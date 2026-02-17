@@ -155,12 +155,11 @@ const Editor = ({ code, setCode, language, setLanguage }) => {
       </select>
     </div>
 
-    {/* ⭐ Scrollable Editor ONLY */}
     <div
       className="flex-grow-1"
       style={{
         overflow: "auto",
-        minHeight: 0,   // ⭐ VERY IMPORTANT FIX
+        minHeight: 0,  
       }}
     >
       <div
