@@ -14,7 +14,7 @@ import { php } from "@codemirror/lang-php";
 import { json } from "@codemirror/lang-json";
 import { xml } from "@codemirror/lang-xml";
 
-const Editor = ({ code, setCode, language, setLanguage }) => {
+const Editor = ({ code, setCode, language, setLanguage ,handleLanguageChange}) => {
   const editorRef = useRef(null);
   const viewRef = useRef(null);
   const languageCompartment = useRef(new Compartment());
@@ -139,7 +139,7 @@ const Editor = ({ code, setCode, language, setLanguage }) => {
         className="form-select form-select-sm"
         style={{ width: "150px" }}
         value={language}
-        onChange={(e) => setLanguage(e.target.value)}
+        onChange={(e) => handleLanguageChange(e.target.value)}
       >
         <option value="javascript">JavaScript</option>
         <option value="typescript">TypeScript</option>
