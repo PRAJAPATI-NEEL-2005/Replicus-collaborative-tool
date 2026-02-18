@@ -12,7 +12,7 @@ const Editorpage = () => {
   const { roomId } = useParams();
   const location = useLocation();
   const { username } = location.state || { username: "Anonymous" };
-
+const lastToastTimeRef = useRef(0);
   const socketRef = useRef(null);
   const codeRef = useRef(null); // ⭐ For latest code reference
   const reactNavigator = useNavigate();
@@ -109,10 +109,17 @@ console.log(greet("World"));
       );
 
       // other user changes the code that is received here
-      socketRef.current.on(Actions.CODE_CHANGE, ({ code }) => {
+      socketRef.current.on(Actions.CODE_CHANGE, ({ code ,username}) => {
         if (code !== null) {
           setCode(code);
         }
+        const now = Date.now();
+
+  // Show toast only once every 3 seconds
+  if (now - lastToastTimeRef.current > 3000) {
+    toast.success(`Code updated by ${username}`);
+    lastToastTimeRef.current = now;
+  }
       });
 
       // initiallly when user join the room then the code is sent to them and received here
@@ -121,7 +128,7 @@ console.log(greet("World"));
           setCode(code);
         }
       });
- // RECEIVE LANGUAGE CHANGE
+      // RECEIVE LANGUAGE CHANGE
       socketRef.current.on(Actions.LANGUAGE_CHANGE, ({ language ,username}) => {
         setLanguage(language);
         toast.success(`${username} changed language to ${language}`);
