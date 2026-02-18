@@ -9,6 +9,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 
 const Editorpage = () => {
+  const isRemoteUpdate = useRef(false);
   const { roomId } = useParams();
   const location = useLocation();
   const { username } = location.state || { username: "Anonymous" };
@@ -111,6 +112,7 @@ console.log(greet("World"));
       // other user changes the code that is received here
       socketRef.current.on(Actions.CODE_CHANGE, ({ code ,username}) => {
         if (code !== null) {
+           isRemoteUpdate.current = true;
           setCode(code);
         }
         const now = Date.now();
@@ -158,6 +160,10 @@ console.log(greet("World"));
   const handleCodeChange = (newCode) => {
     setCode(newCode);
 
+      if (isRemoteUpdate.current) {
+    isRemoteUpdate.current = false;
+    return;
+  }
     socketRef.current?.emit(Actions.CODE_CHANGE, {
       roomId,
       code: newCode,
