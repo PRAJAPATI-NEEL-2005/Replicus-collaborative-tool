@@ -2,6 +2,7 @@ const express = require("express");
 const http = require("http");
 const { Server } = require("socket.io");
 const Actions = require("./src/Actions");
+const { use } = require("react");
 
 const app = express();
 const server = http.createServer(app);
@@ -39,7 +40,12 @@ io.on("connection", (socket) => {
 
   // that event emmited when user changes the code and other user receive the code here
   socket.on(Actions.CODE_CHANGE, ({ roomId, code }) => {
-    socket.in(roomId).emit(Actions.CODE_CHANGE, { code });
+    socket.in(roomId).emit(Actions.CODE_CHANGE, { 
+      code,
+      username: userSocketMap[socket.id], // ⭐ Include username in the broadcast
+
+
+     });
   });
 
   //event emmited when user join the room and the code is sent to them here
