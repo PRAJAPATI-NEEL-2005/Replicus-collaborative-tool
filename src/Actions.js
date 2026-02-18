@@ -6,6 +6,9 @@ const Actions = {
     DISCONNECTED:'disconnected',
     CODE_CHANGE:'code_change',
     LANGUAGE_CHANGE:'language_change',
-    SYNC_LANGUAGE:'sync_language'
+    SYNC_LANGUAGE:'sync_language',
+
+    SEND_MESSAGE: "send_message",
+RECEIVE_MESSAGE: "receive_message",
 };  
 module.exports = Actions;
