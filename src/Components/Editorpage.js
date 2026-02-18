@@ -14,13 +14,15 @@ const Editorpage = () => {
   const location = useLocation();
   const { username } = location.state || { username: "Anonymous" };
 const lastToastTimeRef = useRef(0);
+const chatEndRef = useRef(null);
   const socketRef = useRef(null);
   const codeRef = useRef(null); // ⭐ For latest code reference
   const reactNavigator = useNavigate();
   const languageRef = useRef(null); // ⭐ For latest language reference
   const [clients, setClients] = useState([]);
   const [language, setLanguage] = useState("javascript");
-
+    const [messages, setMessages] = useState([]);
+  const [messageInput, setMessageInput] = useState("");
   const extensionMap = {
    javascript: "js",
   typescript: "ts",
@@ -44,6 +46,9 @@ function greet(name) {
 
 console.log(greet("World"));
 `);
+
+
+
 
   // ⭐ Always store latest code
   useEffect(() => {
@@ -141,6 +146,11 @@ console.log(greet("World"));
         setLanguage(language);
       });
 
+      // RECEIVE CHAT MESSAGE
+       socketRef.current.on(Actions.RECEIVE_MESSAGE, (data) => {
+        setMessages(prev => [...prev, data]);
+      });
+
     };
 
     init();
@@ -152,6 +162,7 @@ console.log(greet("World"));
       socketRef.current?.off(Actions.SYNC_CODE);
         socketRef.current.off(Actions.LANGUAGE_CHANGE);
       socketRef.current.off(Actions.SYNC_LANGUAGE);
+      socketRef.current.off(Actions.RECEIVE_MESSAGE);
       socketRef.current?.disconnect();
     };
   }, []);
@@ -217,6 +228,7 @@ const saveFile = async () => {
       console.log(err);
     }
   };
+
  const handleLanguageChange = (newLang) => {
     setLanguage(newLang);
 
@@ -226,103 +238,137 @@ const saveFile = async () => {
     });
   };
 
+    //function to send chat message and emit the message to server
+    const sendMessage = () => {
+
+    if (!messageInput.trim()) return;
+
+    socketRef.current.emit(Actions.SEND_MESSAGE, {
+      roomId,
+      message: messageInput,
+      username,
+    });
+
+    setMessageInput("");
+  };
 
 
 
 
 
-  return (
-    <div className="d-flex vh-100 bg-light" style={{ overflow:"inherit" }}>
-      {/* Sidebar */}
-      <div
-        className="d-flex flex-column bg-white border-end shadow-sm"
-        style={{ width: "280px" }}
-      >
-        <div className="p-4 d-flex flex-column h-100">
-          {/* Logo */}
-          <div className="text-center mb-4">
-            <img
-              src={Logo}
-              alt="logo"
-              className="rounded"
-              style={{
-                width: "150px",
-                height: "150px",
-                width: "120px",
-                height: "120px",
-                objectFit: "cover",
-              }}
-            />
+    return (
+    <div className="d-flex vh-100 bg-light">
+
+      {/* ---------- SIDEBAR ---------- */}
+      <div className="bg-white border-end" style={{ width: 280 }}>
+
+        <div className="p-4 h-100 d-flex flex-column">
+
+          <img src={Logo} alt="logo" style={{ width: 120 }} className="mx-auto mb-3" />
+
+          <h6 className="text-center">Room ID</h6>
+          <code className="text-center">{roomId}</code>
+
+          <h6 className="mt-3">Users ({clients.length})</h6>
+
+          <div className="flex-grow-1 overflow-auto">
+            {clients.map(client => (
+              <Client key={client.socketId} username={client.username} />
+            ))}
           </div>
 
-          <div className="text-center mb-3">
-            <h6 className="text-muted mb-1">Room ID</h6>
-            <code
-              className="bg-light px-2 py-1 rounded"
-              style={{ fontSize: "12px" }}
-            >
-              {roomId}
-            </code>
-          </div>
+            <button className="btn btn-outline-primary w-100" onClick={copyRoomId} > 
+              {copied ? "✓ Copied!" : "Copy Room ID"} 
+              </button> 
+              <button className="btn btn-outline-danger w-100 mt-2" onClick={leaveRoom} > 
+                Leave Room 
+                </button>
+          <button className="btn btn-success mt-2" onClick={saveFile}>
+            Save File
+          </button>
 
-          <h6 className="text-muted mb-3 text-center">
-            Connected Users ({clients.length})
-          </h6>
-
-          {/* Clients list */}
-          <div
-            className="flex-grow-1 overflow-auto mb-3"
-            style={{ maxHeight: "calc(100vh - 400px)" }}
-          >
-            <div className="d-flex flex-column gap-2">
-              {clients.map((client) => (
-                <div key={client.socketId} className="p-2 rounded bg-light">
-                  <Client username={client.username} />
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Buttons */}
-          <div className="d-flex flex-column gap-2 mt-auto">
-            <button
-              className="btn btn-outline-primary w-100"
-              onClick={copyRoomId}
-            >
-              {copied ? "✓ Copied!" : "Copy Room ID"}
-            </button>
-            <button
-              className="btn btn-outline-danger w-100"
-              onClick={leaveRoom}
-            >
-              Leave Room
-            </button>
-            <button
-              className="btn btn-success"
-              onClick={saveFile}
-            >
-              Save File
-            </button>
-          </div>
         </div>
       </div>
 
-      {/* Editor */}
-      <div className="flex-grow-1 d-flex flex-column">
-        <div className="d-flex gap-3 align-items-center">
-          <small className="text-muted">
-            Lines: {code.split("\n").length} | Characters: {code.length}
-          </small>
+      {/* ---------- EDITOR + CHAT ---------- */}
+      <div className="flex-grow-1 d-flex">
+
+        {/* ---------- EDITOR ---------- */}
+        <div className="flex-grow-1 border-end d-flex flex-column">
+
+          <Editor
+            code={code}
+            setCode={handleCodeChange}
+            language={language}
+            setLanguage={setLanguage}
+            handleLanguageChange={handleLanguageChange}
+          />
+
         </div>
 
-        <div className="flex-grow-1 position-relative">
-         <Editor
-  code={code}
-  setCode={handleCodeChange}
-  language={language}
-  setLanguage={setLanguage}
-  handleLanguageChange={handleLanguageChange} // Pass the new handler
-/>
+        {/* ---------- CHAT PANEL ---------- */}
+        <div style={{ width: 320 }} className="bg-white d-flex flex-column">
+
+          <div className="border-bottom p-2 fw-bold text-center">
+            Room Chat 💬
+          </div>
+
+          {/* Messages */}
+          <div className="flex-grow-1 overflow-auto p-2" style={{ background: "#f8f9fa" }}>
+
+            {messages.map((msg, index) => {
+
+              const isOwn = msg.username === username;
+
+              return (
+                <div
+                  key={index}
+                  className={`d-flex mb-2 ${isOwn ? "justify-content-end" : "justify-content-start"}`}
+                >
+                  <div style={{ maxWidth: "70%" }}>
+
+                    {!isOwn && (
+                      <small className="text-primary fw-bold">
+                        {msg.username}
+                      </small>
+                    )}
+
+                    <div
+                      className={`p-2 rounded ${
+                        isOwn ? "bg-primary text-white" : "bg-light"
+                      }`}
+                    >
+                      {msg.message}
+                    </div>
+
+                    <small className="text-muted">{msg.time}</small>
+
+                  </div>
+                </div>
+              );
+            })}
+
+            <div ref={chatEndRef} />
+
+          </div>
+
+          {/* Input */}
+          <div className="border-top p-2 d-flex gap-2">
+
+            <input
+              className="form-control form-control-sm"
+              placeholder="Type message..."
+              value={messageInput}
+              onChange={(e) => setMessageInput(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && sendMessage()}
+            />
+
+            <button className="btn btn-primary btn-sm" onClick={sendMessage}>
+              Send
+            </button>
+
+          </div>
+
         </div>
       </div>
     </div>
