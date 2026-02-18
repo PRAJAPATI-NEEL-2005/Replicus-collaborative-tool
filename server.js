@@ -53,7 +53,7 @@ io.on("connection", (socket) => {
     io.to(socketId).emit(Actions.SYNC_CODE, { code });
   });
 
-    // ⭐ LANGUAGE CHANGE BROADCAST
+    // LANGUAGE CHANGE BROADCAST
   socket.on(Actions.LANGUAGE_CHANGE, ({ roomId, language }) => {
     socket.in(roomId).emit(Actions.LANGUAGE_CHANGE, { 
       language ,
@@ -62,10 +62,19 @@ io.on("connection", (socket) => {
     });
   });
 
-  // ⭐ LANGUAGE SYNC FOR NEW USER
+  //  LANGUAGE SYNC FOR NEW USER
   socket.on(Actions.SYNC_LANGUAGE, ({ socketId, language }) => {
     io.to(socketId).emit(Actions.SYNC_LANGUAGE, { language });
   });
+
+  // Handle chat messages
+  socket.on(Actions.SEND_MESSAGE, ({ roomId, message, username }) => {
+  io.in(roomId).emit(Actions.RECEIVE_MESSAGE, {
+    message,
+    username,
+    time: new Date().toLocaleTimeString(),
+  });
+});
 
   socket.on("disconnecting", () => {
     const rooms = [...socket.rooms];
