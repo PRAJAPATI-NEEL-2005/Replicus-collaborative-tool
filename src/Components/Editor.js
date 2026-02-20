@@ -120,7 +120,7 @@ const Editor = ({ code, setCode, language, setLanguage ,handleLanguageChange}) =
   };
 
  return (
-  <div className="d-flex flex-column w-100 h-100" style={{ overflow: "hidden" }}>
+  <div className="d-flex flex-column w-100 h-100" style={{ overflow: "hidden"}}>
 
     {/* Toolbar */}
     <div className="bg-light border-bottom px-3 py-2 d-flex justify-content-between flex-shrink-0">
@@ -157,17 +157,21 @@ const Editor = ({ code, setCode, language, setLanguage ,handleLanguageChange}) =
 
     <div
       className="flex-grow-1"
-      style={{
-        overflow: "auto",
-        minHeight: 0,  
-      }}
+        style={{
+    overflow: "hidden",
+    minHeight: 0,
+    minWidth: 0,
+  }}
     >
       <div
         ref={editorRef}
         style={{
-          height: "100%",
-          fontSize: "14px",
-        }}
+    height: "100%",
+    width: "100%",
+    minWidth: 0,
+    overflow: "auto",
+    fontSize: "14px",
+  }}
       />
     </div>
   </div>

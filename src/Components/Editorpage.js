@@ -299,7 +299,7 @@ const saveFile = async () => {
       <div className="flex-grow-1 d-flex">
 
         {/* ---------- EDITOR ---------- */}
-        <div className="flex-grow-1 border-end d-flex flex-column">
+        <div className="flex-grow-1 border-end d-flex flex-column"  style={{ minWidth: 0, overflow: "hidden" }}>
 
           <Editor
             code={code}
