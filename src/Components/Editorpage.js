@@ -48,8 +48,10 @@ console.log(greet("World"));
 `);
 
 
-
-
+    // Scroll to bottom when messages change
+     useEffect(() => {
+    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
   // ⭐ Always store latest code
   useEffect(() => {
     codeRef.current = code;
