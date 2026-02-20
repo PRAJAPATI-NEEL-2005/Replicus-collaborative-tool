@@ -386,15 +386,67 @@ const saveFile = async () => {
           style={{ width: 350, zIndex: 5 }}
         >
           {/* Header */}
-          <div className="p-3 border-bottom d-flex align-items-center justify-content-between bg-white">
-            <div>
-              <h6 className="mb-0 fw-bold text-dark">Room Chat</h6>
-              <small className="text-muted" style={{ fontSize: '0.75rem' }}>Real-time synchronization</small>
-            </div>
-            <div className="dropdown">
-               <button className="btn btn-light btn-sm rounded-circle shadow-none" type="button">⋮</button>
-            </div>
-          </div>
+          <div 
+  className="p-3 d-flex align-items-center justify-content-between bg-white bg-opacity-75"
+  style={{ 
+    backdropFilter: 'blur(10px)', 
+    borderBottom: '1px solid rgba(0,0,0,0.05)',
+    position: 'sticky',
+    top: 0,
+    zIndex: 10
+  }}
+>
+  <div className="d-flex align-items-center gap-3">
+    {/* Modern Gradient Icon */}
+    <div 
+      className="d-flex align-items-center justify-content-center shadow-sm"
+      style={{ 
+        width: '42px', 
+        height: '42px', 
+        borderRadius: '12px',
+        background: 'linear-gradient(135deg, #6366f1 0%, #a855f7 100%)',
+        color: 'white'
+      }}
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+        <path d="M14 1a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H4.414A2 2 0 0 0 3 11.586l-2 2V2a1 1 0 0 1 1-1zM2 0a2 2 0 0 0-2 2v12.793a.5.5 0 0 0 .854.353l2.853-2.853A1 1 0 0 1 4.414 12H14a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2z"/>
+      </svg>
+    </div>
+
+    {/* Title and Animated Status */}
+    <div>
+      <h6 className="mb-0 fw-bold text-dark" style={{ letterSpacing: '-0.3px', fontSize: '1rem' }}>
+        Room Chat
+      </h6>
+      <div className="d-flex align-items-center gap-2">
+        <div className="position-relative d-flex align-items-center">
+          <span 
+            className="position-absolute rounded-circle bg-success animate-ping" 
+            style={{ width: '8px', height: '8px', opacity: 0.6 }}
+          ></span>
+          <span 
+            className="rounded-circle bg-success" 
+            style={{ width: '8px', height: '8px', position: 'relative' }}
+          ></span>
+        </div>
+        <small className="text-muted fw-medium" style={{ fontSize: '0.75rem' }}>
+          Live Sync Active
+        </small>
+      </div>
+    </div>
+  </div>
+  <style>{`
+    @keyframes ping {
+      75%, 100% {
+        transform: scale(2.5);
+        opacity: 0;
+      }
+    }
+    .animate-ping {
+      animation: ping 2s cubic-bezier(0, 0, 0.2, 1) infinite;
+    }
+  `}</style>
+</div>
 
           {/* Messages */}
           <div className="flex-grow-1 overflow-auto p-3 bg-light bg-opacity-50">
