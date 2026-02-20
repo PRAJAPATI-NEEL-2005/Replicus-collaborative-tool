@@ -119,63 +119,82 @@ const Editor = ({ code, setCode, language, setLanguage ,handleLanguageChange}) =
     return extensions[lang] || "txt";
   };
 
- return (
-  <div className="d-flex flex-column w-100 h-100" style={{ overflow: "hidden"}}>
+return (
+    <div className="d-flex flex-column w-100 h-100" style={{ background: "#ffffff" }}>
 
-    {/* Toolbar */}
-    <div className="bg-light border-bottom px-3 py-2 d-flex justify-content-between flex-shrink-0">
+      {/* Modern ToolBar */}
+      <div className="bg-white border-bottom px-4 py-2 d-flex justify-content-between align-items-center flex-shrink-0 shadow-sm" style={{ zIndex: 5 }}>
+        
+        <div className="d-flex align-items-center gap-3">
+          <div className="d-flex align-items-center gap-1">
+             <div className="bg-danger rounded-circle" style={{ width: 10, height: 10 }}></div>
+             <div className="bg-warning rounded-circle" style={{ width: 10, height: 10 }}></div>
+             <div className="bg-success rounded-circle" style={{ width: 10, height: 10 }}></div>
+          </div>
+          
+          <div className="ms-2 d-flex gap-2">
+            <span className="badge rounded-pill border text-dark fw-normal px-3 py-2 bg-light">
+              <span className="text-muted">File:</span> editor.{getFileExtension(language)}
+            </span>
+            <span className="badge rounded-pill bg-dark bg-opacity-10 text-dark fw-bold px-3 py-2 border">
+              {language.toUpperCase()}
+            </span>
+          </div>
+        </div>
 
-      <div className="d-flex gap-2">
-        <span className="badge bg-primary">
-          editor.{getFileExtension(language)}
-        </span>
-
-        <span className="badge bg-secondary">
-          {language.toUpperCase()}
-        </span>
+        <div className="d-flex align-items-center gap-2">
+          <small className="text-muted fw-semibold d-none d-md-block" style={{ fontSize: '0.75rem' }}>LANGUAGE</small>
+          <select
+            className="form-select form-select-sm border-0 bg-light rounded-pill px-3 shadow-sm"
+            style={{ width: "160px", fontSize: '0.85rem', cursor: 'pointer' }}
+            value={language}
+            onChange={(e) => handleLanguageChange(e.target.value)}
+          >
+            <option value="javascript">JavaScript</option>
+            <option value="typescript">TypeScript</option>
+            <option value="python">Python</option>
+            <option value="java">Java</option>
+            <option value="cpp">C++</option>
+            <option value="html">HTML</option>
+            <option value="css">CSS</option>
+            <option value="json">JSON</option>
+            <option value="xml">XML</option>
+            <option value="sql">SQL</option>
+            <option value="php">PHP</option>
+          </select>
+        </div>
       </div>
 
-      <select
-        className="form-select form-select-sm"
-        style={{ width: "150px" }}
-        value={language}
-        onChange={(e) => handleLanguageChange(e.target.value)}
-      >
-        <option value="javascript">JavaScript</option>
-        <option value="typescript">TypeScript</option>
-        <option value="python">Python</option>
-        <option value="java">Java</option>
-        <option value="cpp">C++</option>
-        <option value="html">HTML</option>
-        <option value="css">CSS</option>
-        <option value="json">JSON</option>
-        <option value="xml">XML</option>
-        <option value="sql">SQL</option>
-        <option value="php">PHP</option>
-      </select>
-    </div>
+      {/* Editor Surface */}
+      <div className="flex-grow-1" style={{ overflow: "hidden", background: '#f8fafc' }}>
+        <div
+          ref={editorRef}
+          className="h-100 w-100 modern-cm-wrapper"
+          style={{
+            fontSize: "15px",
+            fontFamily: "'Fira Code', 'Courier New', monospace"
+          }}
+        />
+      </div>
 
-    <div
-      className="flex-grow-1"
-        style={{
-    overflow: "hidden",
-    minHeight: 0,
-    minWidth: 0,
-  }}
-    >
-      <div
-        ref={editorRef}
-        style={{
-    height: "100%",
-    width: "100%",
-    minWidth: 0,
-    overflow: "auto",
-    fontSize: "14px",
-  }}
-      />
+      <style>{`
+        .modern-cm-wrapper .cm-editor {
+          height: 100%;
+          outline: none !important;
+        }
+        .modern-cm-wrapper .cm-scroller {
+          font-family: 'JetBrains Mono', 'Fira Code', monospace !important;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+          width: 5px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          background: rgba(255,255,255,0.1);
+          border-radius: 10px;
+        }
+      `}</style>
     </div>
-  </div>
-);
+  );
 };
 
 export default Editor;
