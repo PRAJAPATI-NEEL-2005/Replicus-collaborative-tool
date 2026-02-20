@@ -262,45 +262,115 @@ const saveFile = async () => {
 
 
     return (
-    <div className="d-flex vh-100 bg-light">
+    <div className="d-flex vh-100" style={{ backgroundColor: "#f8fafc" }}>
 
-      {/* ---------- SIDEBAR ---------- */}
-      <div className="bg-white border-end" style={{ width: 280 }}>
+      {/* ---------- SIDEBAR: Deep Slate Theme ---------- */}
+    <div 
+  className="bg-white d-flex flex-column border-end shadow-sm" 
+  style={{ width: 280, zIndex: 10 }}
+>
+  <div className="p-4 h-100 d-flex flex-column">
+    
+    {/* Logo Area */}
+    <div className="text-center mb-4">
+      <img src={Logo} alt="logo" style={{ width: 140 }} />
+      <div className="mt-3" style={{ height: '2px', background: '#f1f5f9', borderRadius: '2px' }}></div>
+    </div>
 
-        <div className="p-4 h-100 d-flex flex-column">
+    {/* Room ID Box: Soft Pastel Style */}
+    <div 
+      className="rounded p-3 mb-4 text-center border" 
+      style={{ background: "#f8fafc", borderColor: "#e2e8f0" }}
+    >
+      <small 
+        className="text-uppercase fw-bold text-muted mb-1 d-block" 
+        style={{ fontSize: '0.65rem', letterSpacing: '1px' }}
+      >
+        Room Workspace
+      </small>
+      <code className="text-primary fw-bold" style={{ fontSize: '0.95rem' }}>
+        {roomId}
+      </code>
+    </div>
 
-          <img src={Logo} alt="logo" style={{ width: 120 }} className="mx-auto mb-3" />
+    {/* Users Header */}
+    <h6 
+      className="d-flex align-items-center gap-2 mb-3 text-dark fw-bold" 
+      style={{ fontSize: '0.85rem' }}
+    >
+      <span 
+        className="bg-success rounded-circle shadow-sm" 
+        style={{ width: 10, height: 10, border: '2px solid #fff' }}
+      ></span>
+      Collaborators 
+      <span className="badge rounded-pill bg-light text-primary border ms-auto">
+        {clients.length}
+      </span>
+    </h6>
 
-          <h6 className="text-center">Room ID</h6>
-          <code className="text-center">{roomId}</code>
+    {/* User List */}
+    <div className="flex-grow-1 overflow-auto pe-2 custom-scrollbar-light">
+      {clients.map(client => (
+        <Client key={client.socketId} username={client.username} />
+      ))}
+    </div>
 
-          <h6 className="mt-3">Users ({clients.length})</h6>
+    {/* Action Buttons: Clean & Vibrant */}
+    <div className="mt-auto d-flex flex-column gap-2 pt-3 border-top">
+      <button 
+        className="btn btn-light w-100 border py-2 fw-semibold text-dark shadow-sm hover-lift" 
+        onClick={copyRoomId}
+        style={{ background: '#ffffff' }}
+      > 
+        {copied ? "✓ Copied!" : "Copy Room ID"} 
+      </button> 
+      
+      <button 
+        className="btn btn-link text-danger w-100 border shadow-sm mt-1 py-2 fw-semibold text-decoration-none hover-lift" 
+        onClick={leaveRoom} 
+        style={{ fontSize: '0.9rem' }}
+      > 
+        Leave Room 
+      </button>
+      <button 
+        className="btn btn-primary w-100 border-0 shadow-sm py-2 fw-semibold" 
+        onClick={saveFile} 
+        style={{ background: '#6366f1' }}
+      >
+        Save File
+      </button>
 
-          <div className="flex-grow-1 overflow-auto">
-            {clients.map(client => (
-              <Client key={client.socketId} username={client.username} />
-            ))}
-          </div>
+    </div>
+  </div>
 
-            <button className="btn btn-outline-primary w-100" onClick={copyRoomId} > 
-              {copied ? "✓ Copied!" : "Copy Room ID"} 
-              </button> 
-              <button className="btn btn-outline-danger w-100 mt-2" onClick={leaveRoom} > 
-                Leave Room 
-                </button>
-          <button className="btn btn-success mt-2" onClick={saveFile}>
-            Save File
-          </button>
+  {/* In-component CSS for the Scrollbar */}
+  <style>{`
+    .custom-scrollbar-light::-webkit-scrollbar {
+      width: 4px;
+    }
+    .custom-scrollbar-light::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .custom-scrollbar-light::-webkit-scrollbar-thumb {
+      background: #e2e8f0;
+      border-radius: 10px;
+    }
+    .custom-scrollbar-light::-webkit-scrollbar-thumb:hover {
+      background: #cbd5e1;
+    }
+    .hover-lift:hover {
+      background: #fdfdfd !important;
+      transform: translateY(-1px);
+      transition: all 0.2s;
+    }
+  `}</style>
+</div>
 
-        </div>
-      </div>
-
-      {/* ---------- EDITOR + CHAT ---------- */}
-      <div className="flex-grow-1 d-flex">
+      {/* ---------- MAIN CONTENT AREA ---------- */}
+      <div className="flex-grow-1 d-flex overflow-hidden">
 
         {/* ---------- EDITOR ---------- */}
-        <div className="flex-grow-1 border-end d-flex flex-column"  style={{ minWidth: 0, overflow: "hidden" }}>
-
+        <div className="flex-grow-1 d-flex flex-column" style={{ minWidth: 0 }}>
           <Editor
             code={code}
             setCode={handleCodeChange}
@@ -308,73 +378,80 @@ const saveFile = async () => {
             setLanguage={setLanguage}
             handleLanguageChange={handleLanguageChange}
           />
-
         </div>
 
-        {/* ---------- CHAT PANEL ---------- */}
-        <div style={{ width: 320 }} className="bg-white d-flex flex-column">
-
-          <div className="border-bottom p-2 fw-bold text-center">
-            Room Chat 💬
+        {/* ---------- CHAT PANEL: Modern Floating Style ---------- */}
+        <div 
+          className="bg-white d-flex flex-column border-start shadow-sm"
+          style={{ width: 350, zIndex: 5 }}
+        >
+          {/* Header */}
+          <div className="p-3 border-bottom d-flex align-items-center justify-content-between bg-white">
+            <div>
+              <h6 className="mb-0 fw-bold text-dark">Room Chat</h6>
+              <small className="text-muted" style={{ fontSize: '0.75rem' }}>Real-time synchronization</small>
+            </div>
+            <div className="dropdown">
+               <button className="btn btn-light btn-sm rounded-circle shadow-none" type="button">⋮</button>
+            </div>
           </div>
 
           {/* Messages */}
-          <div className="flex-grow-1 overflow-auto p-2" style={{ background: "#f8f9fa" }}>
-
+          <div className="flex-grow-1 overflow-auto p-3 bg-light bg-opacity-50">
             {messages.map((msg, index) => {
-
               const isOwn = msg.username === username;
-
               return (
-                <div
-                  key={index}
-                  className={`d-flex mb-2 ${isOwn ? "justify-content-end" : "justify-content-start"}`}
-                >
-                  <div style={{ maxWidth: "70%" }}>
-
+                <div key={index} className={`d-flex mb-3 ${isOwn ? "justify-content-end" : "justify-content-start"}`}>
+                  <div style={{ maxWidth: "85%" }}>
                     {!isOwn && (
-                      <small className="text-primary fw-bold">
+                      <small className="fw-bold text-primary ms-1 mb-1 d-block" style={{ fontSize: '0.7rem' }}>
                         {msg.username}
                       </small>
                     )}
-
                     <div
-                      className={`p-2 rounded ${
-                        isOwn ? "bg-primary text-white" : "bg-success text-white"
-                      }`}
+                      className={`px-3 py-2 ${isOwn ? "bg-primary text-white shadow" : "bg-white text-dark border shadow-sm"}`}
+                      style={{ 
+                        borderRadius: isOwn ? '16px 16px 4px 16px' : '16px 16px 16px 4px',
+                        fontSize: '0.9rem'
+                      }}
                     >
                       {msg.message}
                     </div>
-
-                    <small className="text-muted">{msg.time}</small>
-
+                    <div className={`mt-1 ${isOwn ? "text-end" : "text-start"}`}>
+                      <small className="text-muted" style={{ fontSize: '0.65rem' }}>{msg.time}</small>
+                    </div>
                   </div>
                 </div>
               );
             })}
-
             <div ref={chatEndRef} />
-
           </div>
 
-          {/* Input */}
-          <div className="border-top p-2 d-flex gap-2">
-
-            <input
-              className="form-control form-control-sm"
-              placeholder="Type message..."
-              value={messageInput}
-              onChange={(e) => setMessageInput(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && sendMessage()}
-            />
-
-            <button className="btn btn-primary btn-sm" onClick={sendMessage}>
-              Send
-            </button>
-
+          {/* Chat Input */}
+          <div className="p-3 bg-white border-top">
+            <div className="input-group bg-light rounded-pill px-2 py-1 align-items-center shadow-inner border">
+              <input
+                type="text"
+                className="form-control border-0 bg-transparent shadow-none py-1"
+                placeholder="Message collaborators..."
+                style={{ fontSize: '0.85rem' }}
+                value={messageInput}
+                onChange={(e) => setMessageInput(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && sendMessage()}
+              />
+              <button 
+                className="btn btn-primary rounded-circle d-flex align-items-center justify-content-center p-0 shadow-sm" 
+                style={{ width: 32, height: 32, background: '#6366f1' }}
+                onClick={sendMessage}
+              >
+                <svg width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
+                  <path d="M15.964.686a.5.5 0 0 0-.65-.65L.767 5.855H.766l-.452.18a.5.5 0 0 0-.082.887l.41.26.001.002 4.995 3.178 3.178 4.995.002.001.26.41a.5.5 0 0 0 .886-.083l6-15Zm-1.833 1.89L6.637 10.07l-.215-.338a.5.5 0 0 0-.154-.154l-.338-.215 7.494-7.494 1.178-.471-.47 1.178Z"/>
+                </svg>
+              </button>
+            </div>
           </div>
-
         </div>
+
       </div>
     </div>
   );
