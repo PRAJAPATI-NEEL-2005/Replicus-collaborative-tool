@@ -151,6 +151,9 @@ console.log(greet("World"));
       // RECEIVE CHAT MESSAGE
        socketRef.current.on(Actions.RECEIVE_MESSAGE, (data) => {
         setMessages(prev => [...prev, data]);
+         if (data.username !== username) {
+    toast.success(`New message from ${data.username}`);
+  }
       });
 
     };
