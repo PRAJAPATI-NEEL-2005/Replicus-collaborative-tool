@@ -71,7 +71,7 @@ io.on("connection", (socket) => {
   socket.on(Actions.SEND_MESSAGE, ({ roomId, message, username }) => {
   io.in(roomId).emit(Actions.RECEIVE_MESSAGE, {
     message,
-    username,
+    username:userSocketMap[socket.id],
     time: new Date().toLocaleTimeString(),
   });
 });
