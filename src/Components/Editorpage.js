@@ -337,7 +337,7 @@ const saveFile = async () => {
 
                     <div
                       className={`p-2 rounded ${
-                        isOwn ? "bg-primary text-white" : "bg-light"
+                        isOwn ? "bg-primary text-white" : "bg-success text-white"
                       }`}
                     >
                       {msg.message}
