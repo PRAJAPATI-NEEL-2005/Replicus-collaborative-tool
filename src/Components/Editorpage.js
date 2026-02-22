@@ -23,6 +23,27 @@ const chatEndRef = useRef(null);
   const [language, setLanguage] = useState("javascript");
     const [messages, setMessages] = useState([]);
   const [messageInput, setMessageInput] = useState("");
+
+
+const [output, setOutput] = useState("");
+const [inputValue, setInputValue] = useState("");
+const [isRunning, setIsRunning] = useState(false);
+const pistonLanguageMap = {
+  javascript: "javascript",
+  typescript: "typescript",
+  python: "python",
+  java: "java",
+  cpp: "cpp",
+  html: "html",
+  css: "css",
+  json: "json",
+  xml: "xml",
+  sql: "sql",
+  php: "php",
+};
+
+
+
   const extensionMap = {
    javascript: "js",
   typescript: "ts",
@@ -36,6 +57,52 @@ const chatEndRef = useRef(null);
   sql: "sql",
   php: "php",
   };
+
+//run code function here
+const runCode = async () => {
+  try {
+    setIsRunning(true);
+    setOutput("Running...");
+
+    const response = await fetch(
+      "https://emkc.org/api/v2/piston/execute",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          language: pistonLanguageMap[language],
+          version: "*",
+          files: [
+            {
+              name: "main",
+              content: code,
+            },
+          ],
+          stdin: inputValue || "",
+        }),
+      }
+    );
+
+    const data = await response.json();
+
+    if (data.compile?.stderr) {
+      setOutput(data.compile.stderr);
+    } else if (data.run?.stderr) {
+      setOutput(data.run.stderr);
+    } else {
+      setOutput(data.run.stdout || "No output.");
+    }
+
+  } catch (error) {
+    setOutput("Error executing code.");
+  } finally {
+    setIsRunning(false);
+  }
+};
+
+
 
   const [code, setCode] = useState(`// Welcome to the collaborative code editor!
 // Start writing your code here.
@@ -377,9 +444,33 @@ const saveFile = async () => {
             language={language}
             setLanguage={setLanguage}
             handleLanguageChange={handleLanguageChange}
+            runCode={runCode}
+            isRunning={isRunning}
           />
         </div>
+          {/* INPUT BOX */}
+  <div className="p-2 border-top bg-light">
+    <textarea
+      className="form-control"
+      placeholder="Custom Input (optional)"
+      value={inputValue}
+      onChange={(e) => setInputValue(e.target.value)}
+      rows={2}
+    />
+  </div>
 
+  {/* OUTPUT PANEL */}
+  <div
+    className="p-3 bg-dark text-success"
+    style={{
+      height: "180px",
+      overflowY: "auto",
+      fontFamily: "monospace",
+      whiteSpace: "pre-wrap",
+    }}
+  >
+    {output}
+  </div>
         {/* ---------- CHAT PANEL: Modern Floating Style ---------- */}
         <div 
           className="bg-white d-flex flex-column border-start shadow-sm"
