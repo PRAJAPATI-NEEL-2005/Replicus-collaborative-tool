@@ -65,7 +65,7 @@ const runCode = async () => {
     setOutput("Running...");
 
     const response = await fetch(
-      "https://emkc.org/api/v2/piston/execute",
+      `${process.env.REACT_APP_BACKEND_URL}/run`,
       {
         method: "POST",
         headers: {
@@ -73,14 +73,8 @@ const runCode = async () => {
         },
         body: JSON.stringify({
           language: pistonLanguageMap[language],
-          version: "*",
-          files: [
-            {
-              name: "main",
-              content: code,
-            },
-          ],
-          stdin: inputValue || "",
+          code,
+          input: inputValue,
         }),
       }
     );
@@ -92,7 +86,7 @@ const runCode = async () => {
     } else if (data.run?.stderr) {
       setOutput(data.run.stderr);
     } else {
-      setOutput(data.run.stdout || "No output.");
+      setOutput(data.run?.stdout || "No output");
     }
 
   } catch (error) {
