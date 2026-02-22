@@ -14,7 +14,7 @@ import { php } from "@codemirror/lang-php";
 import { json } from "@codemirror/lang-json";
 import { xml } from "@codemirror/lang-xml";
 
-const Editor = ({ code, setCode, language, setLanguage ,handleLanguageChange}) => {
+const Editor = ({ code, setCode, language, setLanguage ,handleLanguageChange,runCode, isRunning}) => {
   const editorRef = useRef(null);
   const viewRef = useRef(null);
   const languageCompartment = useRef(new Compartment());
@@ -163,6 +163,13 @@ return (
             <option value="php">PHP</option>
           </select>
         </div>
+        <button
+  className="btn btn-success btn-sm ms-2 rounded-pill px-3"
+  onClick={runCode}
+  disabled={isRunning}
+>
+  {isRunning ? "Running..." : "▶ Run"}
+</button>
       </div>
 
       {/* Editor Surface */}
