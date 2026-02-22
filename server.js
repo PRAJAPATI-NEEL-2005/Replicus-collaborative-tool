@@ -2,13 +2,67 @@ const express = require("express");
 const http = require("http");
 const { Server } = require("socket.io");
 const Actions = require("./src/Actions");
-const { use } = require("react");
+
 
 const app = express();
 const server = http.createServer(app);
-const io = new Server(server);
+const io = new Server(server,{
+  cors: {
+    origin: "http://localhost:3000", 
+    methods: ["GET", "POST"],
+    allowedHeaders: ["Content-Type"]
+  }
+});
 
 const userSocketMap = {};
+const cors = require("cors");
+const axios = require("axios");
+app.use(express.json());
+
+app.use(cors(
+  {
+    origin:"http://localhost:3000", 
+    methods: ["GET", "POST"],
+    allowedHeaders: ["Content-Type"]
+  }
+));
+
+
+//run code api
+app.post("/run", async (req, res) => {
+  const { code, language, input } = req.body;
+
+  try {
+    const response = await axios.post(
+      "https://emkc.org/api/v2/piston/execute",
+      {
+        language,
+        version: "*",
+        files: [
+          {
+            name: "main",
+            content: code,
+          },
+        ],
+        stdin: input || "",
+      }
+    );
+
+    res.json(response.data);
+  } catch (error) {
+    console.log("🔥 FULL ERROR START 🔥");
+  console.log("Message:", error.message);
+  console.log("Response Data:", error.response?.data);
+  console.log("Status:", error.response?.status);
+  console.log("🔥 FULL ERROR END 🔥");
+
+  res.status(500).json({
+    error: error.response?.data || error.message
+  });
+  }
+});
+
+
 
 function getAllConnectedClients(roomId) {
   return Array.from(io.sockets.adapter.rooms.get(roomId) || []).map(
