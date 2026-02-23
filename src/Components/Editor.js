@@ -14,7 +14,7 @@ import { php } from "@codemirror/lang-php";
 import { json } from "@codemirror/lang-json";
 import { xml } from "@codemirror/lang-xml";
 
-const Editor = ({ code, setCode, language, setLanguage ,handleLanguageChange,runCode, isRunning,isRunnable}) => {
+const Editor = ({ code, setCode, language, setLanguage ,handleLanguageChange,runCode, isRunning}) => {
   const editorRef = useRef(null);
   const viewRef = useRef(null);
   const languageCompartment = useRef(new Compartment());
@@ -166,7 +166,7 @@ return (
         <button
   className="btn btn-success btn-sm ms-2 rounded-pill px-3"
   onClick={runCode}
-  disabled={!isRunnable || isRunning}
+  disabled={ isRunning}
 >
   {isRunning ? "Running..." : "▶ Run"}
 </button>
