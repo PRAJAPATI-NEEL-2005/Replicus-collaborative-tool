@@ -29,6 +29,15 @@ const [output, setOutput] = useState("");
 const [inputValue, setInputValue] = useState("");
 const [isRunning, setIsRunning] = useState(false);
 
+const runnableLanguages = [
+  "javascript",
+  "typescript",
+  "python",
+  "java",
+  "cpp",
+  "c",
+  "php",
+];
 
 
 
@@ -48,6 +57,10 @@ const [isRunning, setIsRunning] = useState(false);
 
 //run code function here
 const runCode = async () => {
+   if (!runnableLanguages.includes(language)) {
+    toast.error(`${language.toUpperCase()} cannot be executed.`);
+    return;
+  }
   try {
     setIsRunning(true);
     setOutput("Running...");
@@ -428,6 +441,7 @@ const saveFile = async () => {
             handleLanguageChange={handleLanguageChange}
             runCode={runCode}
             isRunning={isRunning}
+            isRunnable={runnableLanguages.includes(language)}
           />
         </div>
           {/* INPUT BOX */}
