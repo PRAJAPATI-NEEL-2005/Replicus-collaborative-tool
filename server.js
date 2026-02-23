@@ -2,7 +2,7 @@ const express = require("express");
 const http = require("http");
 const { Server } = require("socket.io");
 const Actions = require("./src/Actions");
-
+require("dotenv").config();
 
 const app = express();
 const server = http.createServer(app);
@@ -33,32 +33,50 @@ app.post("/run", async (req, res) => {
   const { code, language, input } = req.body;
 
   try {
+    // Map your frontend language to JDoodle format
+    const languageMap = {
+      javascript: { language: "nodejs", versionIndex: "4" },
+      typescript: { language: "nodejs", versionIndex: "4" },
+      python: { language: "python3", versionIndex: "3" },
+      java: { language: "java", versionIndex: "4" },
+      cpp: { language: "cpp17", versionIndex: "0" },
+      c: { language: "c", versionIndex: "5" },
+      php: { language: "php", versionIndex: "4" },
+      html: null,
+  css: null,
+  json: null,
+  xml: null,
+  sql: null,
+    };
+
+    const selected = languageMap[language];
+
+    if (!selected) {
+ return res.status(400).json({ 
+    error: `${language.toUpperCase()} cannot be executed.`
+  });    }
+
     const response = await axios.post(
-      "https://emkc.org/api/v2/piston/execute",
+      "https://api.jdoodle.com/v1/execute",
       {
-        language,
-        version: "*",
-        files: [
-          {
-            name: "main",
-            content: code,
-          },
-        ],
+        clientId: process.env.JDOODLE_CLIENT_ID,
+        clientSecret: process.env.JDOODLE_CLIENT_SECRET,
+        script: code,
         stdin: input || "",
+        language: selected.language,
+        versionIndex: selected.versionIndex,
       }
     );
 
     res.json(response.data);
-  } catch (error) {
-    console.log("🔥 FULL ERROR START 🔥");
-  console.log("Message:", error.message);
-  console.log("Response Data:", error.response?.data);
-  console.log("Status:", error.response?.status);
-  console.log("🔥 FULL ERROR END 🔥");
 
-  res.status(500).json({
-    error: error.response?.data || error.message
-  });
+  } catch (error) {
+    console.log("🔥 JDoodle ERROR 🔥");
+    console.log(error.response?.data || error.message);
+
+    res.status(500).json({
+      error: error.response?.data || "Execution failed",
+    });
   }
 });
 
