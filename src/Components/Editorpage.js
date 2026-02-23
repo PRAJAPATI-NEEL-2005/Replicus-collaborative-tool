@@ -28,19 +28,7 @@ const chatEndRef = useRef(null);
 const [output, setOutput] = useState("");
 const [inputValue, setInputValue] = useState("");
 const [isRunning, setIsRunning] = useState(false);
-const pistonLanguageMap = {
-  javascript: "javascript",
-  typescript: "typescript",
-  python: "python",
-  java: "java",
-  cpp: "cpp",
-  html: "html",
-  css: "css",
-  json: "json",
-  xml: "xml",
-  sql: "sql",
-  php: "php",
-};
+
 
 
 
@@ -72,7 +60,7 @@ const runCode = async () => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          language: pistonLanguageMap[language],
+          language,
           code,
           input: inputValue,
         }),
@@ -81,12 +69,12 @@ const runCode = async () => {
 
     const data = await response.json();
 
-    if (data.compile?.stderr) {
-      setOutput(data.compile.stderr);
-    } else if (data.run?.stderr) {
-      setOutput(data.run.stderr);
+    if (data.error) {
+      setOutput(JSON.stringify(data.error));
     } else {
-      setOutput(data.run?.stdout || "No output");
+      setOutput(
+        `${data.output || "No Output"}\n\nCPU Time: ${data.cpuTime}s\nMemory: ${data.memory} KB`
+      );
     }
 
   } catch (error) {
