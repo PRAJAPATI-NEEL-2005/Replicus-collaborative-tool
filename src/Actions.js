@@ -10,5 +10,10 @@ const Actions = {
 
     SEND_MESSAGE: "send_message",
 RECEIVE_MESSAGE: "receive_message",
+
+INPUT_CHANGE: "input-change",
+  OUTPUT_UPDATE: "output-update",
+  RUN_STATE_CHANGE: "run-state-change",
+
 };  
 module.exports = Actions;
