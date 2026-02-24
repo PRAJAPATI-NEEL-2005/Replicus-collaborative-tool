@@ -148,6 +148,27 @@ io.on("connection", (socket) => {
   });
 });
 
+// 🔹 INPUT change
+socket.on(Actions.INPUT_CHANGE, ({ roomId, input }) => {
+  socket.in(roomId).emit(Actions.INPUT_CHANGE, { input });
+});
+
+// 🔹 OUTPUT change
+socket.on(Actions.OUTPUT_UPDATE, ({ roomId, output }) => {
+  socket.in(roomId).emit(Actions.OUTPUT_UPDATE, { output });
+});
+
+// 🔹 RUN STATE change
+socket.on(Actions.RUN_STATE_CHANGE, ({ roomId, isRunning }) => {
+  socket.in(roomId).emit(Actions.RUN_STATE_CHANGE, { isRunning });
+});
+
+
+
+
+
+
+
   socket.on("disconnecting", () => {
     const rooms = [...socket.rooms];
 
