@@ -150,7 +150,9 @@ io.on("connection", (socket) => {
 
 // 🔹 INPUT change
 socket.on(Actions.INPUT_CHANGE, ({ roomId, input }) => {
-  socket.in(roomId).emit(Actions.INPUT_CHANGE, { input });
+  socket.in(roomId).emit(Actions.INPUT_CHANGE, { input,
+    username: userSocketMap[socket.id],
+   });
 });
 
 // 🔹 OUTPUT change
@@ -160,7 +162,8 @@ socket.on(Actions.OUTPUT_UPDATE, ({ roomId, output }) => {
 
 // 🔹 RUN STATE change
 socket.on(Actions.RUN_STATE_CHANGE, ({ roomId, isRunning }) => {
-  socket.in(roomId).emit(Actions.RUN_STATE_CHANGE, { isRunning });
+  socket.in(roomId).emit(Actions.RUN_STATE_CHANGE, { isRunning 
+  });
 });
 
 
