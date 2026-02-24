@@ -15,5 +15,7 @@ INPUT_CHANGE: "input-change",
   OUTPUT_UPDATE: "output-update",
   RUN_STATE_CHANGE: "run-state-change",
 
+  INPUT_SYNC: "input-sync",
+
 };  
 module.exports = Actions;
