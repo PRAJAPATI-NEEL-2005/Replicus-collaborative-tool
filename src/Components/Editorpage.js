@@ -431,42 +431,94 @@ const saveFile = async () => {
       {/* ---------- MAIN CONTENT AREA ---------- */}
       <div className="flex-grow-1 d-flex overflow-hidden">
 
-        {/* ---------- EDITOR ---------- */}
-        <div className="flex-grow-1 d-flex flex-column" style={{ minWidth: 0 }}>
-          <Editor
-            code={code}
-            setCode={handleCodeChange}
-            language={language}
-            setLanguage={setLanguage}
-            handleLanguageChange={handleLanguageChange}
-            runCode={runCode}
-            isRunning={isRunning}
-            isRunnable={runnableLanguages.includes(language)}
-          />
-        </div>
-          {/* INPUT BOX */}
-  <div className="p-2 border-top bg-light">
-    <textarea
-      className="form-control"
-      placeholder="Custom Input (optional)"
-      value={inputValue}
-      onChange={(e) => setInputValue(e.target.value)}
-      rows={2}
+      {/* ---------- MIDDLE COLUMN: EDITOR + CONSOLE ---------- */}
+<div className="flex-grow-1 d-flex flex-column border-end" style={{ minWidth: 0 }}>
+  
+  {/* EDITOR (Top Part - Expands to fill space) */}
+  <div className="flex-grow-1 d-flex flex-column overflow-hidden">
+    <Editor
+      code={code}
+      setCode={handleCodeChange}
+      language={language}
+      setLanguage={setLanguage}
+      handleLanguageChange={handleLanguageChange}
+      runCode={runCode}
+      isRunning={isRunning}
+      isRunnable={runnableLanguages.includes(language)}
     />
   </div>
 
-  {/* OUTPUT PANEL */}
-  <div
-    className="p-3 bg-dark text-success"
-    style={{
-      height: "180px",
-      overflowY: "auto",
-      fontFamily: "monospace",
-      whiteSpace: "pre-wrap",
-    }}
-  >
-    {output}
+  {/* SPLIT CONSOLE (Bottom Part - Fixed Height) */}
+  <div className="bg-white border-top shadow-lg" style={{ height: "250px" }}>
+    <div className="row g-0 h-100">
+      
+      {/* LEFT HALF: INPUT BOX */}
+      <div className="col-6 border-end d-flex flex-column">
+        <div className="px-3 py-2 border-bottom bg-light bg-opacity-50 d-flex justify-content-between align-items-center">
+          <small className="text-uppercase fw-bold text-muted" style={{ fontSize: '0.65rem', letterSpacing: '1px' }}>
+            Input
+          </small>
+        </div>
+        <textarea
+          className="form-control flex-grow-1 border-0 bg-transparent shadow-none p-3"
+          placeholder="Enter standard input here..."
+          value={inputValue}
+          onChange={(e) => setInputValue(e.target.value)}
+          style={{ 
+            fontSize: '0.85rem', 
+            fontFamily: "'JetBrains Mono', 'Fira Code', monospace",
+            resize: 'none',
+            lineHeight: '1.5'
+          }}
+        />
+      </div>
+
+      {/* RIGHT HALF: OUTPUT PANEL */}
+      <div className="col-6 d-flex flex-column" style={{ background: "#0f172a" }}>
+        <div className="px-3 py-2 border-bottom border-secondary border-opacity-25 d-flex justify-content-between align-items-center">
+          <small className="text-uppercase fw-bold text-secondary" style={{ fontSize: '0.65rem', letterSpacing: '1px' }}>
+            Terminal Output
+          </small>
+          {isRunning && (
+            <div className="spinner-border spinner-border-sm text-info" role="status"></div>
+          )}
+        </div>
+        <div
+          className="flex-grow-1 p-3 custom-scrollbar-dark"
+          style={{
+            color: "#38bdf8", // Modern Cyan terminal text
+            overflowY: "auto",
+            fontFamily: "'JetBrains Mono', 'Fira Code', monospace",
+            fontSize: "0.85rem",
+            whiteSpace: "pre-wrap",
+            lineHeight: "1.6"
+          }}
+        >
+          {output ? output : (
+            <span className="text-secondary opacity-50 fst-italic">No output yet. Run code to see results...</span>
+          )}
+        </div>
+      </div>
+
+    </div>
   </div>
+</div>
+<style>{`
+  .custom-scrollbar-dark::-webkit-scrollbar {
+    width: 4px;
+  }
+  .custom-scrollbar-dark::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .custom-scrollbar-dark::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+  }
+  .custom-scrollbar-dark::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3);
+  }
+`}</style>
+  
         {/* ---------- CHAT PANEL: Modern Floating Style ---------- */}
         <div 
           className="bg-white d-flex flex-column border-start shadow-sm"
