@@ -231,8 +231,11 @@ console.log(greet("World"));
       });
 
       // RECEIVE RUN STATE CHANGE
-      socketRef.current.on(Actions.RUN_STATE_CHANGE, ({ isRunning }) => {
+      socketRef.current.on(Actions.RUN_STATE_CHANGE, ({ isRunning, username }) => {
   setIsRunning(isRunning);
+  if (username !== location.state.username) {
+    toast.success(`${username} ${isRunning ? "started" : "finished"} running the code.`);
+  }
 });
       // RECEIVE INPUT CHANGE
       socketRef.current.on(Actions.INPUT_CHANGE, ({ input , username}) => {
