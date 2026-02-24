@@ -162,7 +162,8 @@ socket.on(Actions.OUTPUT_UPDATE, ({ roomId, output }) => {
 
 // 🔹 RUN STATE change
 socket.on(Actions.RUN_STATE_CHANGE, ({ roomId, isRunning }) => {
-  socket.in(roomId).emit(Actions.RUN_STATE_CHANGE, { isRunning 
+  socket.in(roomId).emit(Actions.RUN_STATE_CHANGE, { isRunning
+    ,username: userSocketMap[socket.id], 
   });
 });
 
