@@ -235,8 +235,17 @@ console.log(greet("World"));
   setIsRunning(isRunning);
 });
       // RECEIVE INPUT CHANGE
-      socketRef.current.on(Actions.INPUT_CHANGE, ({ input }) => {
+      socketRef.current.on(Actions.INPUT_CHANGE, ({ input , username}) => {
   setInputValue(input);
+  if (username !== location.state.username) {
+    const now = Date.now();
+
+  // Show toast only once every 3 seconds
+  if (now - lastToastTimeRef.current > 3000) {
+    toast.success(`Input updated by ${username}`);
+    lastToastTimeRef.current = now;
+  }
+  }
 });
       // RECEIVE OUTPUT UPDATE        
       socketRef.current.on(Actions.OUTPUT_UPDATE, ({ output }) => {
