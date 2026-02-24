@@ -23,11 +23,17 @@ const chatEndRef = useRef(null);
   const [language, setLanguage] = useState("javascript");
     const [messages, setMessages] = useState([]);
   const [messageInput, setMessageInput] = useState("");
-
+const isRemoteInputUpdate = useRef(false);
 
 const [output, setOutput] = useState("");
 const [inputValue, setInputValue] = useState("");
 const [isRunning, setIsRunning] = useState(false);
+
+const inputRef = useRef("");
+
+useEffect(() => {
+  inputRef.current = inputValue;
+}, [inputValue]);
 
 const runnableLanguages = [
   "javascript",
@@ -182,7 +188,10 @@ console.log(greet("World"));
           language: languageRef.current,
         });
 
-
+        socketRef.current.emit(Actions.INPUT_SYNC, {
+  socketId,
+  input: inputRef.current,
+});
 
         }
       );
@@ -239,7 +248,10 @@ console.log(greet("World"));
 });
       // RECEIVE INPUT CHANGE
       socketRef.current.on(Actions.INPUT_CHANGE, ({ input , username}) => {
-  setInputValue(input);
+ 
+        isRemoteInputUpdate.current = true; 
+        setInputValue(input);
+
   if (username !== location.state.username) {
     const now = Date.now();
 
@@ -253,6 +265,10 @@ console.log(greet("World"));
       // RECEIVE OUTPUT UPDATE        
       socketRef.current.on(Actions.OUTPUT_UPDATE, ({ output }) => {
   setOutput(output);
+});
+
+    socketRef.current.on(Actions.INPUT_SYNC, ({ input }) => {
+  setInputValue(input);
 });
 
       // RECEIVE CHAT MESSAGE
@@ -272,9 +288,13 @@ console.log(greet("World"));
       socketRef.current?.off(Actions.DISCONNECTED);
       socketRef.current?.off(Actions.CODE_CHANGE);
       socketRef.current?.off(Actions.SYNC_CODE);
-        socketRef.current.off(Actions.LANGUAGE_CHANGE);
+      socketRef.current.off(Actions.LANGUAGE_CHANGE);
       socketRef.current.off(Actions.SYNC_LANGUAGE);
       socketRef.current.off(Actions.RECEIVE_MESSAGE);
+      socketRef.current.off(Actions.INPUT_CHANGE);
+      socketRef.current.off(Actions.OUTPUT_UPDATE);
+      socketRef.current.off(Actions.RUN_STATE_CHANGE);
+      socketRef.current.off(Actions.INPUT_SYNC);
       socketRef.current?.disconnect();
     };
   }, []);
@@ -369,6 +389,10 @@ const handleInputChange = (e) => {
     const newInput = e.target.value;
     setInputValue(newInput);
 
+      if (isRemoteInputUpdate.current) {
+    isRemoteInputUpdate.current = false;
+    return;
+  }
     socketRef.current.emit(Actions.INPUT_CHANGE, {
       roomId,
       input: newInput,
