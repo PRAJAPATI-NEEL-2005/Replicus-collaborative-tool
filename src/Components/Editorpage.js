@@ -63,7 +63,15 @@ const runCode = async () => {
   }
   try {
     setIsRunning(true);
+    socketRef.current?.emit(Actions.RUN_STATE_CHANGE, {
+  roomId,
+  isRunning: true,
+});
     setOutput("Running...");
+    socketRef.current?.emit(Actions.OUTPUT_UPDATE, {
+  roomId,
+  output: "Running...",
+  });
 
     const response = await fetch(
       `${process.env.REACT_APP_BACKEND_URL}/run`,
@@ -84,16 +92,28 @@ const runCode = async () => {
 
     if (data.error) {
       setOutput(JSON.stringify(data.error));
+      socketRef.current?.emit(Actions.OUTPUT_UPDATE, {
+  roomId,
+  output: JSON.stringify(data.error),
+});
     } else {
       setOutput(
         `${data.output || "No Output"}\n\nCPU Time: ${data.cpuTime}s\nMemory: ${data.memory} KB`
       );
+      socketRef.current?.emit(Actions.OUTPUT_UPDATE, {
+  roomId,
+  output: `${data.output || "No Output"}\n\nCPU Time: ${data.cpuTime}s\nMemory: ${data.memory} KB`,
+});
     }
 
   } catch (error) {
     setOutput("Error executing code.");
   } finally {
     setIsRunning(false);
+    socketRef.current?.emit(Actions.RUN_STATE_CHANGE, {
+  roomId,
+  isRunning: false,
+});
   }
 };
 
@@ -210,6 +230,19 @@ console.log(greet("World"));
         setLanguage(language);
       });
 
+      // RECEIVE RUN STATE CHANGE
+      socketRef.current.on(Actions.RUN_STATE_CHANGE, ({ isRunning }) => {
+  setIsRunning(isRunning);
+});
+      // RECEIVE INPUT CHANGE
+      socketRef.current.on(Actions.INPUT_CHANGE, ({ input }) => {
+  setInputValue(input);
+});
+      // RECEIVE OUTPUT UPDATE        
+      socketRef.current.on(Actions.OUTPUT_UPDATE, ({ output }) => {
+  setOutput(output);
+});
+
       // RECEIVE CHAT MESSAGE
        socketRef.current.on(Actions.RECEIVE_MESSAGE, (data) => {
         setMessages(prev => [...prev, data]);
@@ -319,7 +352,16 @@ const saveFile = async () => {
     setMessageInput("");
   };
 
+//function to handle input change in terminal and emit the message to server
+const handleInputChange = (e) => {
+    const newInput = e.target.value;
+    setInputValue(newInput);
 
+    socketRef.current.emit(Actions.INPUT_CHANGE, {
+      roomId,
+      input: newInput,
+    });
+  };
 
 
 
@@ -463,7 +505,7 @@ const saveFile = async () => {
           className="form-control flex-grow-1 border-0 bg-transparent shadow-none p-3"
           placeholder="Enter standard input here..."
           value={inputValue}
-          onChange={(e) => setInputValue(e.target.value)}
+          onChange={handleInputChange}
           style={{ 
             fontSize: '0.85rem', 
             fontFamily: "'JetBrains Mono', 'Fira Code', monospace",
