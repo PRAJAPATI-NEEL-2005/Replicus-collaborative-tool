@@ -167,6 +167,10 @@ socket.on(Actions.RUN_STATE_CHANGE, ({ roomId, isRunning }) => {
   });
 });
 
+// 🔹 INPUT SYNC for new user
+socket.on(Actions.INPUT_SYNC, ({ socketId, input }) => {
+  io.to(socketId).emit(Actions.INPUT_SYNC, { input });
+});
 
 
 
