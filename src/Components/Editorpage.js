@@ -582,7 +582,7 @@ const handleInputChange = (e) => {
   }}
 >
   <div className="px-3 py-2 border-bottom border-secondary border-opacity-25 d-flex justify-content-between align-items-center">
-    <small className="text-uppercase fw-bold text-secondary" style={{ fontSize: '0.65rem', letterSpacing: '1px' }}>
+    <small className="text-uppercase fw-bold " style={{ color: "#efe3e3", fontSize: '0.65rem', letterSpacing: '1px' }}>
       Terminal Output
     </small>
     {isRunning && (
@@ -593,7 +593,7 @@ const handleInputChange = (e) => {
   <div
     className="flex-grow-1 p-3 custom-scrollbar-dark"
     style={{
-      color: "#38bdf8",
+      color: "#00ff77",
       overflowY: "auto",
       overflowX: "auto",
       fontFamily: "'JetBrains Mono', 'Fira Code', monospace",
