@@ -29,6 +29,10 @@ const [output, setOutput] = useState("");
 const [inputValue, setInputValue] = useState("");
 const [isRunning, setIsRunning] = useState(false);
 
+const [remoteCursors, setRemoteCursors] = useState({});
+
+
+
 const inputRef = useRef("");
 
 useEffect(() => {
@@ -204,6 +208,11 @@ console.log(greet("World"));
           setClients((prev) =>
             prev.filter((client) => client.socketId !== socketId)
           );
+          setRemoteCursors(prev => {
+      const updated = { ...prev };
+      delete updated[socketId];
+      return updated;
+    });
         }
       );
 
@@ -267,6 +276,7 @@ console.log(greet("World"));
   setOutput(output);
 });
 
+      // RECEIVE INPUT SYNC
     socketRef.current.on(Actions.INPUT_SYNC, ({ input }) => {
   setInputValue(input);
 });
@@ -278,6 +288,13 @@ console.log(greet("World"));
     toast.success(`New message from ${data.username}`);
   }
       });
+      // RECEIVE CURSOR POSITION
+      socketRef.current.on(Actions.CURSOR_POSITION, ({ cursor, username, socketId }) => {
+  setRemoteCursors(prev => ({
+    ...prev,
+    [socketId]: { position: cursor, username }
+  }));
+});
 
     };
 
@@ -523,6 +540,10 @@ const handleInputChange = (e) => {
       runCode={runCode}
       isRunning={isRunning}
       isRunnable={runnableLanguages.includes(language)}
+      socketRef={socketRef}
+  roomId={roomId}
+  username={username}
+  remoteCursors={remoteCursors}
     />
   </div>
 
