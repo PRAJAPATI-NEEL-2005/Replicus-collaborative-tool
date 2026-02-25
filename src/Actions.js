@@ -17,5 +17,7 @@ INPUT_CHANGE: "input-change",
 
   INPUT_SYNC: "input-sync",
 
+  CURSOR_POSITION: "cursor-position",
+
 };  
 module.exports = Actions;
