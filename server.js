@@ -172,7 +172,14 @@ socket.on(Actions.INPUT_SYNC, ({ socketId, input }) => {
   io.to(socketId).emit(Actions.INPUT_SYNC, { input });
 });
 
-
+// 🔹 CURSOR POSITION
+socket.on(Actions.CURSOR_POSITION, ({ roomId, cursor }) => {
+  socket.in(roomId).emit(Actions.CURSOR_POSITION, {
+    cursor,
+    username: userSocketMap[socket.id],
+    socketId: socket.id,
+  });
+});
 
 
 
