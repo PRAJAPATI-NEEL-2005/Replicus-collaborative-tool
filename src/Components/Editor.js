@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from "react";
 import { basicSetup } from "codemirror";
-import { EditorView } from "@codemirror/view";
-import { EditorState, Compartment } from "@codemirror/state";
+import { EditorView, Decoration, WidgetType } from "@codemirror/view";
+import { EditorState, Compartment, StateField, StateEffect } from "@codemirror/state";
 
 import { javascript } from "@codemirror/lang-javascript";
 import { python } from "@codemirror/lang-python";
@@ -14,12 +14,97 @@ import { php } from "@codemirror/lang-php";
 import { json } from "@codemirror/lang-json";
 import { xml } from "@codemirror/lang-xml";
 
-const Editor = ({ code, setCode, language, setLanguage ,handleLanguageChange,runCode, isRunning}) => {
+import Actions from "../Actions";
+
+
+// 🔥 Remote Cursor Setup
+
+const setRemoteCursorsEffect = StateEffect.define();
+
+const remoteCursorField = StateField.define({
+  create() {
+    return Decoration.none;
+  },
+  update(decorations, tr) {
+    decorations = decorations.map(tr.changes);
+
+    for (let effect of tr.effects) {
+      if (effect.is(setRemoteCursorsEffect)) {
+        return effect.value;
+      }
+    }
+    return decorations;
+  },
+  provide: f => EditorView.decorations.from(f),
+});
+
+class RemoteCursorWidget extends WidgetType {
+  constructor(username, color) {
+    super();
+    this.username = username;
+    this.color = color;
+  }
+
+  toDOM() {
+    const wrapper = document.createElement("span");
+    wrapper.style.position = "relative";
+
+    const caret = document.createElement("span");
+    caret.style.borderLeft = `2px solid ${this.color}`;
+    caret.style.marginLeft = "-1px";
+    caret.style.height = "1.2em";
+
+    const label = document.createElement("div");
+    label.textContent = this.username;
+    label.style.position = "absolute";
+    label.style.top = "-18px";
+    label.style.background = this.color;
+    label.style.color = "white";
+    label.style.fontSize = "10px";
+    label.style.padding = "2px 4px";
+    label.style.borderRadius = "4px";
+    label.style.whiteSpace = "nowrap";
+
+    wrapper.appendChild(caret);
+    wrapper.appendChild(label);
+
+    return wrapper;
+  }
+}
+
+
+// 🎨 Color Generator
+
+const getColor = (id) => {
+  const colors = ["#ef4444", "#3b82f6", "#22c55e", "#a855f7", "#f59e0b"];
+  let hash = 0;
+  for (let i = 0; i < id.length; i++) {
+    hash += id.charCodeAt(i);
+  }
+  return colors[hash % colors.length];
+};
+
+
+// 🧠 Editor Component
+
+const Editor = ({
+  code,
+  setCode,
+  language,
+  handleLanguageChange,
+  runCode,
+  isRunning,
+  socketRef,
+  roomId,
+  remoteCursors,
+}) => {
+
   const editorRef = useRef(null);
   const viewRef = useRef(null);
   const languageCompartment = useRef(new Compartment());
 
-  // ---------- Language Extension Mapper ----------
+  // Language Extension Mapper
+
   const getLanguageExtension = (lang) => {
     const extensions = {
       javascript: javascript(),
@@ -38,7 +123,9 @@ const Editor = ({ code, setCode, language, setLanguage ,handleLanguageChange,run
     return extensions[lang] || javascript();
   };
 
-  // ---------- Initialize Editor ----------
+
+  // 🚀 Initialize Editor
+
   useEffect(() => {
     if (!editorRef.current || viewRef.current) return;
 
@@ -46,6 +133,7 @@ const Editor = ({ code, setCode, language, setLanguage ,handleLanguageChange,run
       doc: code,
       extensions: [
         basicSetup,
+        remoteCursorField,
 
         languageCompartment.current.of(
           getLanguageExtension(language)
@@ -54,6 +142,15 @@ const Editor = ({ code, setCode, language, setLanguage ,handleLanguageChange,run
         EditorView.updateListener.of((update) => {
           if (update.docChanged) {
             setCode(update.state.doc.toString());
+          }
+
+          if (update.selectionSet) {
+            const pos = update.state.selection.main.head;
+
+            socketRef?.current?.emit(Actions.CURSOR_POSITION, {
+              roomId,
+              cursor: pos,
+            });
           }
         }),
       ],
@@ -72,7 +169,9 @@ const Editor = ({ code, setCode, language, setLanguage ,handleLanguageChange,run
     };
   }, []);
 
-  // ---------- Update Language Dynamically ----------
+
+  //  Update Language
+
   useEffect(() => {
     if (!viewRef.current) return;
 
@@ -83,7 +182,9 @@ const Editor = ({ code, setCode, language, setLanguage ,handleLanguageChange,run
     });
   }, [language]);
 
-  // ---------- Sync Code ----------
+
+  // 🔄 Sync Code
+
   useEffect(() => {
     if (!viewRef.current) return;
 
@@ -100,7 +201,36 @@ const Editor = ({ code, setCode, language, setLanguage ,handleLanguageChange,run
     }
   }, [code]);
 
-  // ---------- File Extension ----------
+
+  // 👥 Render Remote Cursors
+
+  useEffect(() => {
+    if (!viewRef.current) return;
+
+    const decorations = [];
+
+    Object.entries(remoteCursors || {}).forEach(([socketId, data]) => {
+      const color = getColor(socketId);
+
+      decorations.push(
+        Decoration.widget({
+          widget: new RemoteCursorWidget(data.username, color),
+          side: 1,
+        }).range(data.position)
+      );
+    });
+
+    const decoSet = Decoration.set(decorations);
+
+    viewRef.current.dispatch({
+      effects: setRemoteCursorsEffect.of(decoSet),
+    });
+
+  }, [remoteCursors]);
+
+
+  // 📁 File Extension Helper
+
   const getFileExtension = (lang) => {
     const extensions = {
       javascript: "js",
@@ -119,34 +249,28 @@ const Editor = ({ code, setCode, language, setLanguage ,handleLanguageChange,run
     return extensions[lang] || "txt";
   };
 
-return (
+
+  // 🖥 UI
+
+  return (
     <div className="d-flex flex-column w-100 h-100" style={{ background: "#ffffff" }}>
 
-      {/* Modern ToolBar */}
-      <div className="bg-white border-bottom px-4 py-2 d-flex justify-content-between align-items-center flex-shrink-0 shadow-sm" style={{ zIndex: 5 }}>
-        
+      {/* Toolbar */}
+      <div className="bg-white border-bottom px-4 py-2 d-flex justify-content-between align-items-center flex-shrink-0 shadow-sm">
+
         <div className="d-flex align-items-center gap-3">
-          <div className="d-flex align-items-center gap-1">
-             <div className="bg-danger rounded-circle" style={{ width: 10, height: 10 }}></div>
-             <div className="bg-warning rounded-circle" style={{ width: 10, height: 10 }}></div>
-             <div className="bg-success rounded-circle" style={{ width: 10, height: 10 }}></div>
-          </div>
-          
-          <div className="ms-2 d-flex gap-2">
-            <span className="badge rounded-pill border text-dark fw-normal px-3 py-2 bg-light">
-              <span className="text-muted">File:</span> editor.{getFileExtension(language)}
-            </span>
-            <span className="badge rounded-pill bg-dark bg-opacity-10 text-dark fw-bold px-3 py-2 border">
-              {language.toUpperCase()}
-            </span>
-          </div>
+          <span className="badge bg-light text-dark border">
+            editor.{getFileExtension(language)}
+          </span>
+          <span className="badge bg-dark bg-opacity-10 text-dark border">
+            {language.toUpperCase()}
+          </span>
         </div>
 
         <div className="d-flex align-items-center gap-2">
-          <small className="text-muted fw-semibold d-none d-md-block" style={{ fontSize: '0.75rem' }}>LANGUAGE</small>
           <select
-            className="form-select form-select-sm border-0 bg-light rounded-pill px-3 shadow-sm"
-            style={{ width: "160px", fontSize: '0.85rem', cursor: 'pointer' }}
+            className="form-select form-select-sm"
+            style={{ width: "150px" }}
             value={language}
             onChange={(e) => handleLanguageChange(e.target.value)}
           >
@@ -162,44 +286,29 @@ return (
             <option value="sql">SQL</option>
             <option value="php">PHP</option>
           </select>
+
+          <button
+            className="btn btn-success btn-sm"
+            onClick={runCode}
+            disabled={isRunning}
+          >
+            {isRunning ? "Running..." : "▶ Run"}
+          </button>
         </div>
-        <button
-  className="btn btn-success btn-sm ms-2 rounded-pill px-3"
-  onClick={runCode}
-  disabled={ isRunning}
->
-  {isRunning ? "Running..." : "▶ Run"}
-</button>
       </div>
 
-      {/* Editor Surface */}
-      <div className="flex-grow-1" style={{ overflow: "hidden", background: '#f8fafc' }}>
+      {/* Editor */}
+      <div className="flex-grow-1" style={{ overflow: "hidden" }}>
         <div
           ref={editorRef}
-          className="h-100 w-100 modern-cm-wrapper"
+          className="h-100 w-100"
           style={{
             fontSize: "15px",
-            fontFamily: "'Fira Code', 'Courier New', monospace"
+            fontFamily: "'Fira Code', monospace"
           }}
         />
       </div>
 
-      <style>{`
-        .modern-cm-wrapper .cm-editor {
-          height: 100%;
-          outline: none !important;
-        }
-        .modern-cm-wrapper .cm-scroller {
-          font-family: 'JetBrains Mono', 'Fira Code', monospace !important;
-        }
-        .custom-scrollbar::-webkit-scrollbar {
-          width: 5px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-          background: rgba(255,255,255,0.1);
-          border-radius: 10px;
-        }
-      `}</style>
     </div>
   );
 };
