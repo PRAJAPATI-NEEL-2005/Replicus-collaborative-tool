@@ -573,31 +573,44 @@ const handleInputChange = (e) => {
       </div>
 
       {/* RIGHT HALF: OUTPUT PANEL */}
-      <div className="col-6 d-flex flex-column" style={{ background: "#0f172a" }}>
-        <div className="px-3 py-2 border-bottom border-secondary border-opacity-25 d-flex justify-content-between align-items-center">
-          <small className="text-uppercase fw-bold text-secondary" style={{ fontSize: '0.65rem', letterSpacing: '1px' }}>
-            Terminal Output
-          </small>
-          {isRunning && (
-            <div className="spinner-border spinner-border-sm text-info" role="status"></div>
-          )}
-        </div>
-        <div
-          className="flex-grow-1 p-3 custom-scrollbar-dark"
-          style={{
-            color: "#38bdf8", // Modern Cyan terminal text
-            overflowY: "auto",
-            fontFamily: "'JetBrains Mono', 'Fira Code', monospace",
-            fontSize: "0.85rem",
-            whiteSpace: "pre-wrap",
-            lineHeight: "1.6"
-          }}
-        >
-          {output ? output : (
-            <span className="text-secondary opacity-50 fst-italic">No output yet. Run code to see results...</span>
-          )}
-        </div>
-      </div>
+      <div
+  className="col-6 d-flex flex-column"
+  style={{
+    background: "#080b12",
+    minHeight: 0,
+    height: "100%"
+  }}
+>
+  <div className="px-3 py-2 border-bottom border-secondary border-opacity-25 d-flex justify-content-between align-items-center">
+    <small className="text-uppercase fw-bold text-secondary" style={{ fontSize: '0.65rem', letterSpacing: '1px' }}>
+      Terminal Output
+    </small>
+    {isRunning && (
+      <div className="spinner-border spinner-border-sm text-info" role="status"></div>
+    )}
+  </div>
+
+  <div
+    className="flex-grow-1 p-3 custom-scrollbar-dark"
+    style={{
+      color: "#38bdf8",
+      overflowY: "auto",
+      overflowX: "auto",
+      fontFamily: "'JetBrains Mono', 'Fira Code', monospace",
+      fontSize: "0.85rem",
+      whiteSpace: "pre-wrap",
+      wordBreak: "break-word",
+      lineHeight: "1.6",
+      minHeight: 0
+    }}
+  >
+    {output ? output : (
+      <span className="text-secondary opacity-50 fst-italic">
+        No output yet. Run code to see results...
+      </span>
+    )}
+  </div>
+</div>
 
     </div>
   </div>
