@@ -110,6 +110,21 @@ io.on("connection", (socket) => {
     });
   });
 
+    // Check username availability
+      socket.on(Actions.CHECK_USERNAME, async ({ roomId, username }) => {
+    const clients = getAllConnectedClients(roomId);
+    const isUsernameTaken = clients.some(client => client.username === username);
+
+    if (isUsernameTaken) {
+      socket.emit("username-error", "Username already taken in this room");
+    } else {
+      socket.emit("username-ok");
+    }
+  });
+
+
+
+
   // that event emmited when user changes the code and other user receive the code here
   socket.on(Actions.CODE_CHANGE, ({ roomId, code }) => {
     socket.in(roomId).emit(Actions.CODE_CHANGE, { 
