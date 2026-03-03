@@ -19,5 +19,7 @@ INPUT_CHANGE: "input-change",
 
   CURSOR_POSITION: "cursor-position",
 
+  CHECK_USERNAME: "check-username",
+
 };  
 module.exports = Actions;
