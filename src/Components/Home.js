@@ -1,4 +1,7 @@
 import React, { useState } from "react";
+
+import io from "socket.io-client";
+
 import { Container, Row, Col, Card, Form, Button } from "react-bootstrap";
 import { v4 as uuidV4 } from "uuid";
 import toast from "react-hot-toast";
@@ -17,6 +20,10 @@ const staggerContainer = {
   animate: { transition: { staggerChildren: 0.1 } }
 };
 
+
+const socket = io("http://localhost:5000");
+
+
 function Home() {
   const [roomId, setRoomId] = useState("");
   const [username, setUsername] = useState("");
@@ -27,7 +34,15 @@ function Home() {
       toast.error("Room ID and Username are required");
       return;
     }
+    socket.emit("check-username", { roomId, username });
+
+  socket.once("username-error", (message) => {
+    toast.error(message);
+  });
+
+  socket.once("username-ok", () => {
     navigate(`/editor/${roomId}`, { state: { username } });
+  });
   };
 
   const handleCreate = (e) => {
