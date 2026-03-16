@@ -262,9 +262,6 @@ const Editor = ({
           <span className="badge bg-light text-dark border">
             editor.{getFileExtension(language)}
           </span>
-          <span className="badge bg-dark bg-opacity-10 text-dark border">
-            {language.toUpperCase()}
-          </span>
         </div>
 
         <div className="d-flex align-items-center gap-2">
