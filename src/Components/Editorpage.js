@@ -530,7 +530,7 @@ const handleInputChange = (e) => {
 <div className="flex-grow-1 d-flex flex-column border-end" style={{ minWidth: 0 }}>
   
   {/* EDITOR (Top Part - Expands to fill space) */}
-  <div className="flex-grow-1 d-flex flex-column overflow-hidden">
+  <div className="flex-grow-1 d-flex flex-column " style={{minHeight:0 ,overflow:"hidden" }}>
     <Editor
       code={code}
       setCode={handleCodeChange}
@@ -610,6 +610,7 @@ const handleInputChange = (e) => {
       </span>
     )}
   </div>
+
 </div>
 
     </div>
@@ -630,6 +631,8 @@ const handleInputChange = (e) => {
     background: rgba(255, 255, 255, 0.3);
   }
 `}</style>
+
+
   
         {/* ---------- CHAT PANEL: Modern Floating Style ---------- */}
         <div 
