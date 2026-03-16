@@ -202,32 +202,46 @@ const Editor = ({
   }, [code]);
 
 
-  // 👥 Render Remote Cursors
+ 
 
-  useEffect(() => {
-    if (!viewRef.current) return;
+ // 👥 Render Remote Cursors
 
-    const decorations = [];
+useEffect(() => {
+  if (!viewRef.current) return;
 
-    Object.entries(remoteCursors || {}).forEach(([socketId, data]) => {
-      const color = getColor(socketId);
+  const docLength = viewRef.current.state.doc.length;
 
-      decorations.push(
-        Decoration.widget({
-          widget: new RemoteCursorWidget(data.username, color),
-          side: 1,
-        }).range(data.position)
-      );
+  const decorations = [];
+
+  Object.entries(remoteCursors || {}).forEach(([socketId, data]) => {
+    if (!data || typeof data.position !== "number") return;
+
+    // Prevent invalid cursor positions
+    const pos = Math.max(0, Math.min(data.position, docLength));
+
+    const color = getColor(socketId);
+
+    decorations.push({
+      from: pos,
+      deco: Decoration.widget({
+        widget: new RemoteCursorWidget(data.username, color),
+        side: 1,
+      }),
     });
+  });
 
-    const decoSet = Decoration.set(decorations);
+  // Sort by position
+  decorations.sort((a, b) => a.from - b.from);
 
-    viewRef.current.dispatch({
-      effects: setRemoteCursorsEffect.of(decoSet),
-    });
+  const ranges = decorations.map(d => d.deco.range(d.from));
 
-  }, [remoteCursors]);
+  const decoSet = Decoration.set(ranges, true);
 
+  viewRef.current.dispatch({
+    effects: setRemoteCursorsEffect.of(decoSet),
+  });
+
+}, [remoteCursors]);
 
   // 📁 File Extension Helper
 
