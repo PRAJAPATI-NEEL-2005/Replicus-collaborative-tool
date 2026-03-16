@@ -467,15 +467,11 @@ const handleInputChange = (e) => {
 
     {/* User List */}
     <div className="flex-grow-1 overflow-auto pe-2 custom-scrollbar-light">
-      {[...clients]
-  .sort((a, b) => {
-    if (a.username === username) return -1;
-    if (b.username === username) return 1;
-    return 0;
-  })
-  .map(client => (
-    <Client key={client.socketId} username={client.username} />
-  ))}
+      {clients.map(client => (
+        <Client key={client.socketId} username={client.username === username
+        ? `${client.username}(Me)`
+        : client.username} />
+      ))}
     </div>
 
     {/* Action Buttons: Clean & Vibrant */}
