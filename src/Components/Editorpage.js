@@ -474,7 +474,11 @@ const handleInputChange = (e) => {
     return 0;
   })
   .map(client => (
-    <Client key={client.socketId} username={client.username} />
+    <Client key={client.socketId}  username={
+      client.username === username
+        ? `${client.username}(Me)`
+        : client.username
+    } />
   ))}
     </div>
 
