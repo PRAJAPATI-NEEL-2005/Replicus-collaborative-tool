@@ -3,12 +3,12 @@ const http = require("http");
 const { Server } = require("socket.io");
 const Actions = require("./src/Actions");
 require("dotenv").config();
-
+const port = process.env.PORT || 5000;
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server,{
   cors: {
-    origin: "http://localhost:3000", 
+    origin: process.env.REACT_APP_FRONTEND_URL, 
     methods: ["GET", "POST"],
     allowedHeaders: ["Content-Type"]
   }
@@ -21,7 +21,7 @@ app.use(express.json());
 
 app.use(cors(
   {
-    origin:"http://localhost:3000", 
+    origin:process.env.REACT_APP_FRONTEND_URL, 
     methods: ["GET", "POST"],
     allowedHeaders: ["Content-Type"]
   }
@@ -213,6 +213,6 @@ socket.on(Actions.CURSOR_POSITION, ({ roomId, cursor }) => {
   });
 });
 
-server.listen(5000, () => {
-  console.log("Server running on 5000");
+server.listen(port, () => {
+  console.log(`Server running on port ${port}`);
 });
