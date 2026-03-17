@@ -1,70 +1,137 @@
-# Getting Started with Create React App
+# 🚀 Replicus - Real-Time Collaborative Coding Platform
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Replicus is a real-time collaborative coding platform that allows multiple users to join a shared room, write code together, communicate via chat, and execute code instantly.
 
-## Available Scripts
+It is designed to simulate a live coding interview / pair programming environment with seamless synchronization.
 
-In the project directory, you can run:
+---
 
-### `npm start`
+## 🌐 Live Demo
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+- 🔗 Frontend: https://replicus-collaborative-tool.vercel.app  
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+---
 
-### `npm test`
+## ✨ Features
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+### 👨‍💻 Real-Time Code Collaboration
+- Multiple users can join a room using a Room ID
+- Live code synchronization using Socket.IO
+- Displays username of the user making changes
 
-### `npm run build`
+### 💬 Real-Time Chat
+- Built-in chat system for communication
+- Timestamped messages
+- Username-based messaging
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+### ⚡ Code Execution (JDoodle Integration)
+- Supports multiple languages:
+  - JavaScript, Python, Java, C++, C, PHP
+- Input & Output synchronization across users
+- Real-time execution results
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+### 🔄 Live Synchronization
+- Code sync for new users joining
+- Language sync across all users
+- Input/output sync
+- Run state sync
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+### 🎯 Cursor Tracking
+- Shows cursor position of other users
+- Improves collaboration experience
 
-### `npm run eject`
+### 🔐 Username Validation
+- Prevents duplicate usernames in the same room
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+---
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+## 🛠️ Tech Stack
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+### Frontend
+- React.js
+- Tailwind CSS
+- Socket.IO Client
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+### Backend
+- Node.js
+- Express.js
+- Socket.IO
 
-## Learn More
+### APIs & Services
+- JDoodle API (Code Execution)
+- Render (Backend Deployment)
+- Vercel (Frontend Deployment)
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+---
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+## 📁 Project Structure
+Replicus/
+│
+├── frontend/
+│ ├── src/
+│ │ ├── components/
+│ │ ├── pages/
+│ │ └── socket.js
+│
+├── backend/
+│ ├── server.js
+│ ├── Actions.js
+│ └── .env
 
-### Code Splitting
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+---
 
-### Analyzing the Bundle Size
+## 🌍 Deployment
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+- Frontend deployed on **Vercel**
+- Backend deployed on **Render**
 
-### Making a Progressive Web App
+---
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+## ⚠️ Challenges Faced
 
-### Advanced Configuration
+- CORS issues during deployment
+- Real-time synchronization handling
+- Socket connection issues in production
+- Environment variable configuration
+- Handling multiple users in same room
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+---
 
-### Deployment
+## 🧠 Learnings
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+- Deep understanding of WebSockets & Socket.IO
+- Handling real-time data synchronization
+- Backend deployment and CORS configuration
+- API integration (JDoodle)
+- Scalable room-based architecture
 
-### `npm run build` fails to minify
+---
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+## 🚀 Future Enhancements
+
+- 🧑‍🎨 Collaborative Whiteboard (planned)
+- 🎥 Video/Audio Calling
+- 📁 File Sharing
+- 🧠 AI Code Suggestions
+- 🏆 Code Interview Mode
+- 💾 Code Saving & History
+
+---
+
+## 👨‍💻 Author
+
+**Neel H. Prajapati**
+
+- GitHub: https://github.com/PRAJAPATI-NEEL-2005  
+- Email: workspace10072005@gmail.com  
+
+---
+
+## ⭐ Support
+
+If you like this project, give it a ⭐ on GitHub!
+
+---
+
+
