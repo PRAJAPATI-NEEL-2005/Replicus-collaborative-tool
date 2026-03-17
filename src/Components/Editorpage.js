@@ -416,6 +416,23 @@ const handleInputChange = (e) => {
     });
   };
 
+  const shareRoom = async () => {
+   
+    if (navigator.share) {
+      try {
+        await navigator.share({
+           title: 'Join my Code Room',
+          text: `Hey! I'm working on some code and would love for you to join my live collaborative workspace.\n\nRoom ID: ${roomId}\n\n1. Copy the Room ID above\n2. Click the link below\n3. Paste the ID and enter your name to join!`,
+          url: `${process.env.REACT_APP_FRONTEND_URL}`
+        });
+      } catch (error) {
+        console.log('Error sharing room:', error);
+      }
+    } else {
+      // Fallback for browsers that don't support the Web Share API
+      alert('Sharing is not supported on this browser. Please use "Copy Room ID" instead.');
+    }
+  };
 
 
     return (
@@ -482,29 +499,45 @@ const handleInputChange = (e) => {
   ))}
     </div>
 
-    {/* Action Buttons: Clean & Vibrant */}
+   {/* Action Buttons: Clean & Vibrant */}
     <div className="mt-auto d-flex flex-column gap-2 pt-3 border-top">
-      <button 
-        className="btn btn-light w-100 border py-2 fw-semibold text-dark shadow-sm hover-lift" 
-        onClick={copyRoomId}
-        style={{ background: '#ffffff' }}
-      > 
-        {copied ? "✓ Copied!" : "Copy Room ID"} 
-      </button> 
       
-      <button 
-        className="btn btn-link text-danger w-100 border shadow-sm mt-1 py-2 fw-semibold text-decoration-none hover-lift" 
-        onClick={leaveRoom} 
-        style={{ fontSize: '0.9rem' }}
-      > 
-        Leave Room 
-      </button>
+      {/* Row for Copy and Share to save vertical space, or stack them */}
+      <div className="d-flex gap-2">
+        <button 
+          className="btn btn-light flex-grow-1 border py-2 fw-semibold text-dark shadow-sm hover-lift" 
+          onClick={copyRoomId}
+          style={{ background: '#ffffff', fontSize: '0.9rem' }}
+        > 
+          {copied ? "✓ Copied!" : "Copy ID"} 
+        </button> 
+
+        <button 
+          className="btn btn-light flex-grow-1 border py-2 fw-semibold text-primary shadow-sm hover-lift d-flex align-items-center justify-content-center gap-1" 
+          onClick={shareRoom}
+          style={{ background: '#ffffff', fontSize: '0.9rem' }}
+        > 
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
+            <path d="M13.5 1a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zM11 2.5a2.5 2.5 0 1 1 .603 1.628l-6.718 3.12a2.49 2.49 0 0 1 0 1.504l6.718 3.12a2.5 2.5 0 1 1-.488.876l-6.718-3.12a2.5 2.5 0 1 1 0-3.256l6.718-3.12A2.5 2.5 0 0 1 11 2.5z"/>
+          </svg>
+          Share
+        </button>
+      </div>
+      
       <button 
         className="btn btn-primary w-100 border-0 shadow-sm py-2 fw-semibold" 
         onClick={saveFile} 
         style={{ background: '#6366f1' }}
       >
         Save File
+      </button>
+
+      <button 
+        className="btn btn-link text-danger w-100 border shadow-sm mt-1 py-2 fw-semibold text-decoration-none hover-lift" 
+        onClick={leaveRoom} 
+        style={{ fontSize: '0.9rem' }}
+      > 
+        Leave Room 
       </button>
 
     </div>
