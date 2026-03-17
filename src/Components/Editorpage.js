@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import Editor from "./Editor";
-import { Navigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import Client from "./Client";
 import Logo from "./logo.png";
 import { initsocket } from "../socket";
