@@ -115,9 +115,6 @@ const confirmLogout = window.confirm("Are you sure you want to log out?");
                    <p className="user-email">{user?.email || "Fetching session..."}</p>
                 </div>
                 <Dropdown.Divider className="divider-custom" />
-                <Dropdown.Item onClick={() => navigate("/settings")} className="dropdown-item-custom">
-                  <Settings size={16} className="me-2" /> Account Settings
-                </Dropdown.Item>
                 <Dropdown.Item onClick={handleLogout} className="dropdown-item-custom text-danger">
                   <LogOut size={16} className="me-2" /> Sign Out
                 </Dropdown.Item>
