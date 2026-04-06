@@ -1,8 +1,12 @@
 const express = require("express");
+require("dotenv").config();
 const http = require("http");
 const { Server } = require("socket.io");
 const Actions = require("./src/Actions");
-require("dotenv").config();
+const connectToMongo = require("./config/db");
+connectToMongo();
+
+
 const port = process.env.PORT || 5000;
 const app = express();
 const server = http.createServer(app);
@@ -10,7 +14,7 @@ const io = new Server(server,{
   cors: {
     origin: process.env.REACT_APP_FRONTEND_URL, 
     methods: ["GET", "POST"],
-    allowedHeaders: ["Content-Type"]
+    allowedHeaders: ["Content-Type", "auth-token"]
   }
 });
 
@@ -19,14 +23,13 @@ const cors = require("cors");
 const axios = require("axios");
 app.use(express.json());
 
-app.use(cors(
-  {
-    origin:process.env.REACT_APP_FRONTEND_URL, 
-    methods: ["GET", "POST"],
-    allowedHeaders: ["Content-Type"]
-  }
-));
-
+app.use(cors({
+  origin: process.env.REACT_APP_FRONTEND_URL,
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  allowedHeaders: ["Content-Type", "auth-token"],
+  credentials: true
+}));
+app.use('/api/auth', require('./routes/auth'));
 
 //run code api
 app.post("/run", async (req, res) => {
