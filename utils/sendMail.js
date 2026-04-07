@@ -1,6 +1,6 @@
 const nodemailer = require("nodemailer");
 
-const sendMail = async (email, otp) => {
+const sendMail = async (email, otp, type = "signup") => {
   const transporter = nodemailer.createTransport({
     service: "gmail",
     auth: {
@@ -9,6 +9,21 @@ const sendMail = async (email, otp) => {
     },
   });
 
+  // Dynamic Content Variables
+  let subjectText = "";
+  let headingText = "";
+  let bodyText = "";
+
+  if (type === "signup") {
+    subjectText = "Welcome to Replicus - Verification Code";
+    headingText = "Verify your email address";
+    bodyText = "Welcome to Replicus! To complete your registration and access your secure collaborative terminal, please enter the following verification code:";
+  } else if (type === "reset") {
+    subjectText = "Replicus Password Reset Request";
+    headingText = "Reset your password";
+    bodyText = "We received a request to reset the password for your Replicus account. Please enter the following code to proceed. If you didn't request this, you can safely ignore this email.";
+  }
+
   // Replicus Branded HTML Email Template
   const htmlTemplate = `
     <!DOCTYPE html>
@@ -16,7 +31,7 @@ const sendMail = async (email, otp) => {
     <head>
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Replicus Verification</title>
+      <title>Replicus System</title>
     </head>
     <body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f8fafc; color: #333333;">
       
@@ -34,9 +49,9 @@ const sendMail = async (email, otp) => {
 
               <tr>
                 <td style="padding: 40px;">
-                  <h2 style="margin: 0 0 15px; font-size: 24px; color: #1e293b;">Verify your email address</h2>
+                  <h2 style="margin: 0 0 15px; font-size: 24px; color: #1e293b;">${headingText}</h2>
                   <p style="margin: 0 0 25px; font-size: 16px; color: #64748b; line-height: 1.5;">
-                    Welcome to Replicus! To complete your registration and access your secure collaborative terminal, please enter the following verification code:
+                    ${bodyText}
                   </p>
 
                   <div style="background-color: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; text-align: center; margin-bottom: 25px;">
@@ -46,7 +61,7 @@ const sendMail = async (email, otp) => {
                   </div>
 
                   <p style="margin: 0 0 15px; font-size: 14px; color: #64748b; line-height: 1.5;">
-                    This code will expire in <strong>5 minutes</strong>. If you did not request this code, please safely ignore this email.
+                    This code will expire in <strong>5 minutes</strong>.
                   </p>
                   
                   <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 30px 0;">
@@ -77,9 +92,9 @@ const sendMail = async (email, otp) => {
   `;
 
   await transporter.sendMail({
-    from: `"Replicus Security" <${process.env.EMAIL_USER}>`, // Adds a professional sender name
+    from: `"Replicus Security" <${process.env.EMAIL_USER}>`,
     to: email,
-    subject: "Your Replicus Verification Code",
+    subject: subjectText, // 🔥 Uses the dynamic subject
     html: htmlTemplate,
   });
 };
