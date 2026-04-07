@@ -35,7 +35,7 @@ router.post("/signup", async (req, res) => {
 
     await user.save();
 
-    await sendMail(email, otp);
+    await sendMail(email, otp,"signup");
 
     res.json({ success: true, message: "OTP sent to email" });
 
@@ -84,7 +84,7 @@ router.post("/forgot-password", async (req, res) => {
 
     await user.save();
 
-    await sendMail(email, otp);
+    await sendMail(email, otp,"reset");
 
     res.json({ success: true, message: "OTP sent to email" });
 
