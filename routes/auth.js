@@ -4,39 +4,67 @@ const User = require('../models/User');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const fetchUser = require('../middleware/fetchUser');
-
+const sendMail = require('../utils/sendMail');
+const otpGenerator = require("otp-generator");
 const JWT_SECRET = process.env.JWT_SECRET;
 
 // ✅ SIGNUP
-router.post('/signup', async (req, res) => {
-  try {
-    let user = await User.findOne({ email: req.body.email });
+router.post("/signup", async (req, res) => {
+  const { name, email, password } = req.body;
 
-    if (user) {
+  try {
+    let user = await User.findOne({ email });
+
+    if (user && user.isVerified) {
       return res.status(400).json({ error: "User already exists" });
     }
 
-    const salt = await bcrypt.genSalt(10);
-    const secPass = await bcrypt.hash(req.body.password, salt);
-
-    user = await User.create({
-      name: req.body.name,
-      email: req.body.email,
-      password: secPass
+    const otp = otpGenerator.generate(6, {
+      upperCaseAlphabets: false,
+      specialChars: false
     });
 
-    const data = {
-      user: { id: user.id }
-    };
+    const otpExpiry = Date.now() + 5 * 60 * 1000; // 5 mins
 
-    const token = jwt.sign(data, JWT_SECRET);
+    if (!user) {
+      user = new User({ name, email, password });
+    }
 
-    res.json({ token });
+    user.otp = otp;
+    user.otpExpiry = otpExpiry;
+
+    await user.save();
+
+    await sendMail(email, otp);
+
+    res.json({ success: true, message: "OTP sent to email" });
 
   } catch (err) {
-    console.error(err.message);
-    res.status(500).send("Server Error");
+    res.status(500).json({ error: "Server error" });
   }
+});
+
+
+
+
+router.post("/verify-otp", async (req, res) => {
+  const { email, otp } = req.body;
+
+  const user = await User.findOne({ email });
+
+  if (!user) return res.status(400).json({ error: "User not found" });
+
+  if (user.otp !== otp || user.otpExpiry < Date.now()) {
+    return res.status(400).json({ error: "Invalid or expired OTP" });
+  }
+
+  user.isVerified = true;
+  user.otp = null;
+  user.otpExpiry = null;
+
+  await user.save();
+
+  res.json({ success: true, message: "Email verified successfully" });
 });
 
 // ✅ LOGIN
