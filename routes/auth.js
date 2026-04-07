@@ -43,10 +43,7 @@ router.post("/signup", async (req, res) => {
     res.status(500).json({ error: "Server error" });
   }
 });
-
-
-
-
+// ✅ VERIFY OTP SIGNUP
 router.post("/verify-otp", async (req, res) => {
   const { email, otp } = req.body;
 
@@ -65,6 +62,66 @@ router.post("/verify-otp", async (req, res) => {
   await user.save();
 
   res.json({ success: true, message: "Email verified successfully" });
+});
+// ✅ FORGOT PASSWORD
+router.post("/forgot-password", async (req, res) => {
+  const { email } = req.body;
+
+  try {
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(400).json({ error: "User not found" });
+    }
+
+    const otp = otpGenerator.generate(6, {
+      upperCaseAlphabets: false,
+      specialChars: false,
+    });
+
+    user.otp = otp;
+    user.otpExpiry = Date.now() + 5 * 60 * 1000;
+
+    await user.save();
+
+    await sendMail(email, otp);
+
+    res.json({ success: true, message: "OTP sent to email" });
+
+  } catch (err) {
+    res.status(500).json({ error: "Server error" });
+  }
+});
+// ✅ VERIFY OTP FOR PASSWORD RESET
+router.post("/verify-reset-otp", async (req, res) => {
+  const { email, otp } = req.body;
+
+  const user = await User.findOne({ email });
+
+  if (!user || user.otp !== otp || user.otpExpiry < Date.now()) {
+    return res.status(400).json({ error: "Invalid or expired OTP" });
+  }
+
+  res.json({ success: true });
+});
+// ✅ RESET PASSWORD
+router.post("/reset-password", async (req, res) => {
+  const { email, newPassword } = req.body;
+
+  const user = await User.findOne({ email });
+
+  if (!user) return res.status(400).json({ error: "User not found" });
+
+  const salt = await bcrypt.genSalt(10);
+  const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+  user.password = hashedPassword;
+  user.otp = null;
+  user.otpExpiry = null;
+
+  await user.save();
+
+  res.json({ success: true, message: "Password updated successfully" });
 });
 
 // ✅ LOGIN
