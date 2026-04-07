@@ -1,165 +1,102 @@
 import React, { useEffect, useState, useRef } from "react";
 import Editor from "./Editor";
-import { useParams } from "react-router-dom";
+import { useParams, useLocation, useNavigate } from "react-router-dom";
 import Client from "./Client";
 import Logo from "./logo.png";
 import { initsocket } from "../socket";
 import Actions from "../Actions";
-import { useLocation, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
-
+import { Copy, Share2, Save, LogOut, MessageSquare, Send, Terminal, Activity, Users } from "lucide-react"; // 🔥 Added Lucide Icons
+import { Spinner } from "react-bootstrap";
 const Editorpage = () => {
   const isRemoteUpdate = useRef(false);
   const { roomId } = useParams();
   const location = useLocation();
   const { username } = location.state || { username: "Anonymous" };
-const lastToastTimeRef = useRef(0);
-const chatEndRef = useRef(null);
+  const lastToastTimeRef = useRef(0);
+  const chatEndRef = useRef(null);
   const socketRef = useRef(null);
-  const codeRef = useRef(null); // ⭐ For latest code reference
+  const codeRef = useRef(null); 
   const reactNavigator = useNavigate();
-  const languageRef = useRef(null); // ⭐ For latest language reference
+  const languageRef = useRef(null); 
   const [clients, setClients] = useState([]);
   const [language, setLanguage] = useState("javascript");
-    const [messages, setMessages] = useState([]);
+  const [messages, setMessages] = useState([]);
   const [messageInput, setMessageInput] = useState("");
-const isRemoteInputUpdate = useRef(false);
+  const isRemoteInputUpdate = useRef(false);
 
-const [output, setOutput] = useState("");
-const [inputValue, setInputValue] = useState("");
-const [isRunning, setIsRunning] = useState(false);
+  const [output, setOutput] = useState("");
+  const [inputValue, setInputValue] = useState("");
+  const [isRunning, setIsRunning] = useState(false);
 
-const [remoteCursors, setRemoteCursors] = useState({});
+  const [remoteCursors, setRemoteCursors] = useState({});
 
+  const inputRef = useRef("");
 
+  useEffect(() => {
+    inputRef.current = inputValue;
+  }, [inputValue]);
 
-const inputRef = useRef("");
-
-useEffect(() => {
-  inputRef.current = inputValue;
-}, [inputValue]);
-
-const runnableLanguages = [
-  "javascript",
-  "typescript",
-  "python",
-  "java",
-  "cpp",
-  "c",
-  "php",
-];
-
-
+  const runnableLanguages = ["javascript", "typescript", "python", "java", "cpp", "c", "php"];
 
   const extensionMap = {
-   javascript: "js",
-  typescript: "ts",
-  python: "py",
-  java: "java",
-  cpp: "cpp",
-  html: "html",
-  css: "css",
-  json: "json",
-  xml: "xml",
-  sql: "sql",
-  php: "php",
+    javascript: "js", typescript: "ts", python: "py", java: "java", cpp: "cpp",
+    html: "html", css: "css", json: "json", xml: "xml", sql: "sql", php: "php",
   };
 
-//run code function here
-const runCode = async () => {
-   if (!runnableLanguages.includes(language)) {
-    toast.error(`${language.toUpperCase()} cannot be executed.`);
-    return;
-  }
-  try {
-    setIsRunning(true);
-    socketRef.current?.emit(Actions.RUN_STATE_CHANGE, {
-  roomId,
-  isRunning: true,
-});
-    setOutput("Running...");
-    socketRef.current?.emit(Actions.OUTPUT_UPDATE, {
-  roomId,
-  output: "Running...",
-  });
-
-    const response = await fetch(
-      `${process.env.REACT_APP_BACKEND_URL}/run`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          language,
-          code,
-          input: inputValue,
-        }),
-      }
-    );
-
-    const data = await response.json();
-
-    if (data.error) {
-      setOutput(JSON.stringify(data.error));
-      socketRef.current?.emit(Actions.OUTPUT_UPDATE, {
-  roomId,
-  output: JSON.stringify(data.error),
-});
-    } else {
-      setOutput(
-        `${data.output || "No Output"}\n\nCPU Time: ${data.cpuTime}s\nMemory: ${data.memory} KB`
-      );
-      socketRef.current?.emit(Actions.OUTPUT_UPDATE, {
-  roomId,
-  output: `${data.output || "No Output"}\n\nCPU Time: ${data.cpuTime}s\nMemory: ${data.memory} KB`,
-});
+  const runCode = async () => {
+    if (!runnableLanguages.includes(language)) {
+      toast.error(`${language.toUpperCase()} cannot be executed.`);
+      return;
     }
+    try {
+      setIsRunning(true);
+      socketRef.current?.emit(Actions.RUN_STATE_CHANGE, { roomId, isRunning: true });
+      setOutput("Running...");
+      socketRef.current?.emit(Actions.OUTPUT_UPDATE, { roomId, output: "Running..." });
 
-  } catch (error) {
-    setOutput("Error executing code.");
-  } finally {
-    setIsRunning(false);
-    socketRef.current?.emit(Actions.RUN_STATE_CHANGE, {
-  roomId,
-  isRunning: false,
-});
-  }
-};
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/run`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ language, code, input: inputValue }),
+      });
 
+      const data = await response.json();
 
+      if (data.error) {
+        setOutput(JSON.stringify(data.error));
+        socketRef.current?.emit(Actions.OUTPUT_UPDATE, { roomId, output: JSON.stringify(data.error) });
+      } else {
+        const formattedOutput = `${data.output || "No Output"}\n\n[CPU Time: ${data.cpuTime}s | Memory: ${data.memory} KB]`;
+        setOutput(formattedOutput);
+        socketRef.current?.emit(Actions.OUTPUT_UPDATE, { roomId, output: formattedOutput });
+      }
+    } catch (error) {
+      setOutput("Error executing code.");
+    } finally {
+      setIsRunning(false);
+      socketRef.current?.emit(Actions.RUN_STATE_CHANGE, { roomId, isRunning: false });
+    }
+  };
 
-  const [code, setCode] = useState(`// Welcome to the collaborative code editor!
+  const [code, setCode] = useState(`// Welcome to the Replicus collaborative terminal!
 // Start writing your code here.
 
 function greet(name) {
   return "Hello, " + name + "!";
 }
 
-console.log(greet("World"));
+console.log(greet("Developer"));
 `);
 
-
-    // Scroll to bottom when messages change
-     useEffect(() => {
-    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
-  // ⭐ Always store latest code
-  useEffect(() => {
-    codeRef.current = code;
-  }, [code]);
-
-  //
-    useEffect(() => {
-    languageRef.current = language;
-  }, [language]);
+  useEffect(() => { chatEndRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages]);
+  useEffect(() => { codeRef.current = code; }, [code]);
+  useEffect(() => { languageRef.current = language; }, [language]);
 
   useEffect(() => {
     const init = async () => {
       if (socketRef.current) return;
-
       socketRef.current = await initsocket();
-
       socketRef.current.on("connect_error", handleErrors);
       socketRef.current.on("connect_failed", handleErrors);
 
@@ -171,131 +108,77 @@ console.log(greet("World"));
 
       socketRef.current.emit(Actions.JOIN, { roomId, username });
 
-      // that is initial join event 
-      socketRef.current.on(
-        Actions.JOINED,
-        ({ clients, username, socketId }) => {
-          if (username !== location.state.username) {
-            toast.success(`${username} joined the room.`);
-          }
+      socketRef.current.on(Actions.JOINED, ({ clients, username, socketId }) => {
+        if (username !== location.state.username) {
+          toast.success(`${username} joined the room.`);
+        }
+        setClients(clients);
+        socketRef.current.emit(Actions.SYNC_CODE, { code: codeRef.current, socketId });
+        socketRef.current.emit(Actions.SYNC_LANGUAGE, { socketId, language: languageRef.current });
+        socketRef.current.emit(Actions.INPUT_SYNC, { socketId, input: inputRef.current });
+      });
 
-          setClients(clients);
-
-          // if new user come then the current code sent to them
-          socketRef.current.emit(Actions.SYNC_CODE, {
-            code: codeRef.current,
-            socketId,
-          });
-             // Sync Language
-        socketRef.current.emit(Actions.SYNC_LANGUAGE, {
-          socketId,
-          language: languageRef.current,
+      socketRef.current.on(Actions.DISCONNECTED, ({ socketId, username }) => {
+        toast.success(`${username} left the room.`);
+        setClients((prev) => prev.filter((client) => client.socketId !== socketId));
+        setRemoteCursors(prev => {
+          const updated = { ...prev };
+          delete updated[socketId];
+          return updated;
         });
+      });
 
-        socketRef.current.emit(Actions.INPUT_SYNC, {
-  socketId,
-  input: inputRef.current,
-});
-
-        }
-      );
-
-      // if any user closes the room 
-      socketRef.current.on(
-        Actions.DISCONNECTED,
-        ({ socketId, username }) => {
-          toast.success(`${username} left the room.`);
-          setClients((prev) =>
-            prev.filter((client) => client.socketId !== socketId)
-          );
-          setRemoteCursors(prev => {
-      const updated = { ...prev };
-      delete updated[socketId];
-      return updated;
-    });
-        }
-      );
-
-      // other user changes the code that is received here
-      socketRef.current.on(Actions.CODE_CHANGE, ({ code ,username}) => {
+      socketRef.current.on(Actions.CODE_CHANGE, ({ code, username }) => {
         if (code !== null) {
-           isRemoteUpdate.current = true;
+          isRemoteUpdate.current = true;
           setCode(code);
         }
         const now = Date.now();
-
-  // Show toast only once every 3 seconds
-  if (now - lastToastTimeRef.current > 3000) {
-    toast.success(`Code updated by ${username}`);
-    lastToastTimeRef.current = now;
-  }
-      });
-
-      // initiallly when user join the room then the code is sent to them and received here
-      socketRef.current.on(Actions.SYNC_CODE, ({ code }) => {
-        if (code !== null) {
-          setCode(code);
+        if (now - lastToastTimeRef.current > 3000) {
+          toast.success(`Code updated by ${username}`);
+          lastToastTimeRef.current = now;
         }
       });
-      // RECEIVE LANGUAGE CHANGE
-      socketRef.current.on(Actions.LANGUAGE_CHANGE, ({ language ,username}) => {
+
+      socketRef.current.on(Actions.SYNC_CODE, ({ code }) => { if (code !== null) setCode(code); });
+      socketRef.current.on(Actions.LANGUAGE_CHANGE, ({ language, username }) => {
         setLanguage(language);
         toast.success(`${username} changed language to ${language}`);
       });
+      socketRef.current.on(Actions.SYNC_LANGUAGE, ({ language }) => { setLanguage(language); });
 
-      // RECEIVE LANGUAGE SYNC
-      socketRef.current.on(Actions.SYNC_LANGUAGE, ({ language }) => {
-        setLanguage(language);
+      socketRef.current.on(Actions.RUN_STATE_CHANGE, ({ isRunning, username }) => {
+        setIsRunning(isRunning);
+        if (username !== location.state.username) {
+          toast.success(`${username} ${isRunning ? "started" : "finished"} running the code.`);
+        }
       });
 
-      // RECEIVE RUN STATE CHANGE
-      socketRef.current.on(Actions.RUN_STATE_CHANGE, ({ isRunning, username }) => {
-  setIsRunning(isRunning);
-  if (username !== location.state.username) {
-    toast.success(`${username} ${isRunning ? "started" : "finished"} running the code.`);
-  }
-});
-      // RECEIVE INPUT CHANGE
-      socketRef.current.on(Actions.INPUT_CHANGE, ({ input , username}) => {
- 
+      socketRef.current.on(Actions.INPUT_CHANGE, ({ input, username }) => {
         isRemoteInputUpdate.current = true; 
         setInputValue(input);
-
-  if (username !== location.state.username) {
-    const now = Date.now();
-
-  // Show toast only once every 3 seconds
-  if (now - lastToastTimeRef.current > 3000) {
-    toast.success(`Input updated by ${username}`);
-    lastToastTimeRef.current = now;
-  }
-  }
-});
-      // RECEIVE OUTPUT UPDATE        
-      socketRef.current.on(Actions.OUTPUT_UPDATE, ({ output }) => {
-  setOutput(output);
-});
-
-      // RECEIVE INPUT SYNC
-    socketRef.current.on(Actions.INPUT_SYNC, ({ input }) => {
-  setInputValue(input);
-});
-
-      // RECEIVE CHAT MESSAGE
-       socketRef.current.on(Actions.RECEIVE_MESSAGE, (data) => {
-        setMessages(prev => [...prev, data]);
-         if (data.username !== username) {
-    toast.success(`New message from ${data.username}`);
-  }
+        if (username !== location.state.username) {
+          const now = Date.now();
+          if (now - lastToastTimeRef.current > 3000) {
+            toast.success(`Input updated by ${username}`);
+            lastToastTimeRef.current = now;
+          }
+        }
       });
-      // RECEIVE CURSOR POSITION
-      socketRef.current.on(Actions.CURSOR_POSITION, ({ cursor, username, socketId }) => {
-  setRemoteCursors(prev => ({
-    ...prev,
-    [socketId]: { position: cursor, username }
-  }));
-});
 
+      socketRef.current.on(Actions.OUTPUT_UPDATE, ({ output }) => { setOutput(output); });
+      socketRef.current.on(Actions.INPUT_SYNC, ({ input }) => { setInputValue(input); });
+
+      socketRef.current.on(Actions.RECEIVE_MESSAGE, (data) => {
+        setMessages(prev => [...prev, data]);
+        if (data.username !== username) {
+          toast.success(`New message from ${data.username}`);
+        }
+      });
+
+      socketRef.current.on(Actions.CURSOR_POSITION, ({ cursor, username, socketId }) => {
+        setRemoteCursors(prev => ({ ...prev, [socketId]: { position: cursor, username } }));
+      });
     };
 
     init();
@@ -305,516 +188,343 @@ console.log(greet("World"));
       socketRef.current?.off(Actions.DISCONNECTED);
       socketRef.current?.off(Actions.CODE_CHANGE);
       socketRef.current?.off(Actions.SYNC_CODE);
-      socketRef.current.off(Actions.LANGUAGE_CHANGE);
-      socketRef.current.off(Actions.SYNC_LANGUAGE);
-      socketRef.current.off(Actions.RECEIVE_MESSAGE);
-      socketRef.current.off(Actions.INPUT_CHANGE);
-      socketRef.current.off(Actions.OUTPUT_UPDATE);
-      socketRef.current.off(Actions.RUN_STATE_CHANGE);
-      socketRef.current.off(Actions.INPUT_SYNC);
+      socketRef.current?.off(Actions.LANGUAGE_CHANGE);
+      socketRef.current?.off(Actions.SYNC_LANGUAGE);
+      socketRef.current?.off(Actions.RECEIVE_MESSAGE);
+      socketRef.current?.off(Actions.INPUT_CHANGE);
+      socketRef.current?.off(Actions.OUTPUT_UPDATE);
+      socketRef.current?.off(Actions.RUN_STATE_CHANGE);
+      socketRef.current?.off(Actions.INPUT_SYNC);
       socketRef.current?.disconnect();
     };
   }, []);
 
-  // code typing occurs then code updates to new
   const handleCodeChange = (newCode) => {
     setCode(newCode);
-
-      if (isRemoteUpdate.current) {
-    isRemoteUpdate.current = false;
-    return;
-  }
-    socketRef.current?.emit(Actions.CODE_CHANGE, {
-      roomId,
-      code: newCode,
-    });
+    if (isRemoteUpdate.current) {
+      isRemoteUpdate.current = false;
+      return;
+    }
+    socketRef.current?.emit(Actions.CODE_CHANGE, { roomId, code: newCode });
   };
 
   const [copied, setCopied] = useState(false);
 
   const copyRoomId = () => {
     try {
-    
-    navigator.clipboard.writeText(roomId).then(() => {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    });
-    toast.success("Room ID copied to clipboard!");
-  } catch (err) {
-    toast.error("Failed to copy Room ID.");}
+      navigator.clipboard.writeText(roomId).then(() => {
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      });
+      toast.success("Room ID copied to clipboard!");
+    } catch (err) {
+      toast.error("Failed to copy Room ID.");
+    }
   };
 
   const leaveRoom = () => {
-    if (window.confirm("Are you sure you want to leave this room?")) {
+    if (window.confirm("Are you sure you want to leave this secure session?")) {
       window.history.back();
     }
   };
 
-
-const saveFile = async () => {
+  const saveFile = async () => {
     try {
       const ext = extensionMap[language] || "txt";
-
       const options = {
-        suggestedName: `code.${ext}`,
-        types: [
-          {
-            description: `${language} file`,
-            accept: {
-              "text/plain": [`.${ext}`],
-            },
-          },
-        ],
+        suggestedName: `replicus_code.${ext}`,
+        types: [{ description: `${language} file`, accept: { "text/plain": [`.${ext}`] } }],
       };
-
       const handle = await window.showSaveFilePicker(options);
       const writable = await handle.createWritable();
       await writable.write(code);
       await writable.close();
-
-      toast.success("File saved successfully!");
+      toast.success("File saved securely!");
     } catch (err) {
       console.log(err);
     }
   };
 
- const handleLanguageChange = (newLang) => {
+  const handleLanguageChange = (newLang) => {
     setLanguage(newLang);
-
-    socketRef.current.emit(Actions.LANGUAGE_CHANGE, {
-      roomId,
-      language: newLang,
-    });
+    socketRef.current.emit(Actions.LANGUAGE_CHANGE, { roomId, language: newLang });
   };
 
-    //function to send chat message and emit the message to server
-    const sendMessage = () => {
-
+  const sendMessage = () => {
     if (!messageInput.trim()) return;
-
-    socketRef.current.emit(Actions.SEND_MESSAGE, {
-      roomId,
-      message: messageInput,
-      username,
-    });
-
+    socketRef.current.emit(Actions.SEND_MESSAGE, { roomId, message: messageInput, username });
     setMessageInput("");
   };
 
-//function to handle input change in terminal and emit the message to server
-const handleInputChange = (e) => {
+  const handleInputChange = (e) => {
     const newInput = e.target.value;
     setInputValue(newInput);
-
-      if (isRemoteInputUpdate.current) {
-    isRemoteInputUpdate.current = false;
-    return;
-  }
-    socketRef.current.emit(Actions.INPUT_CHANGE, {
-      roomId,
-      input: newInput,
-    });
+    if (isRemoteInputUpdate.current) {
+      isRemoteInputUpdate.current = false;
+      return;
+    }
+    socketRef.current.emit(Actions.INPUT_CHANGE, { roomId, input: newInput });
   };
 
   const shareRoom = async () => {
-   
     if (navigator.share) {
       try {
         await navigator.share({
-           title: 'Join my Code Room',
-          text: `Hey! I'm working on some code and would love for you to join my live collaborative workspace.\n\nRoom ID: ${roomId}\n\n1. Copy the Room ID above\n2. Click the link below\n3. Paste the ID and enter your name to join!`,
+           title: 'Join Replicus Terminal',
+          text: `Join my live collaborative coding workspace on Replicus.\n\nRoom ID: ${roomId}\n\nUse the link below to join:`,
           url: `${process.env.REACT_APP_FRONTEND_URL}`
         });
-      } catch (error) {
-        console.log('Error sharing room:', error);
-      }
+      } catch (error) { console.log('Error sharing room:', error); }
     } else {
-      // Fallback for browsers that don't support the Web Share API
-      alert('Sharing is not supported on this browser. Please use "Copy Room ID" instead.');
+      alert('Sharing is not supported on this browser. Please use "Copy ID" instead.');
     }
   };
 
+  return (
+    <div className="d-flex vh-100" style={{ backgroundColor: "#f8fafc", fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
 
-    return (
-    <div className="d-flex vh-100" style={{ backgroundColor: "#f8fafc" }}>
-
-      {/* ---------- SIDEBAR: Deep Slate Theme ---------- */}
-    <div 
-  className="bg-white d-flex flex-column border-end shadow-sm" 
-  style={{ width: 280, zIndex: 10 }}
->
-  <div className="p-4 h-100 d-flex flex-column">
-    
-    {/* Logo Area */}
-    <div className="text-center mb-4">
-      <img src={Logo} alt="logo" style={{ width: 140 }} />
-      <div className="mt-3" style={{ height: '2px', background: '#f1f5f9', borderRadius: '2px' }}></div>
-    </div>
-
-    {/* Room ID Box: Soft Pastel Style */}
-    <div 
-      className="rounded p-3 mb-4 text-center border" 
-      style={{ background: "#f8fafc", borderColor: "#e2e8f0" }}
-    >
-      <small 
-        className="text-uppercase fw-bold text-muted mb-1 d-block" 
-        style={{ fontSize: '0.65rem', letterSpacing: '1px' }}
-      >
-        Room Workspace
-      </small>
-      <code className="text-primary fw-bold" style={{ fontSize: '0.95rem' }}>
-        {roomId}
-      </code>
-    </div>
-
-    {/* Users Header */}
-    <h6 
-      className="d-flex align-items-center gap-2 mb-3 text-dark fw-bold" 
-      style={{ fontSize: '0.85rem' }}
-    >
-      <span 
-        className="bg-success rounded-circle shadow-sm" 
-        style={{ width: 10, height: 10, border: '2px solid #fff' }}
-      ></span>
-      Collaborators 
-      <span className="badge rounded-pill bg-light text-primary border ms-auto">
-        {clients.length}
-      </span>
-    </h6>
-
-    {/* User List */}
-    <div className="flex-grow-1 overflow-auto pe-2 custom-scrollbar-light">
-      {[...clients]
-  .sort((a, b) => {
-    if (a.username === username) return -1;
-    if (b.username === username) return 1;
-    return 0;
-  })
-  .map(client => (
-    <Client key={client.socketId}  username={
-      client.username === username
-        ? `${client.username}(Me)`
-        : client.username
-    } />
-  ))}
-    </div>
-
-   {/* Action Buttons: Clean & Vibrant */}
-    <div className="mt-auto d-flex flex-column gap-2 pt-3 border-top">
-      
-      {/* Row for Copy and Share to save vertical space, or stack them */}
-      <div className="d-flex gap-2">
-        <button 
-          className="btn btn-light flex-grow-1 border py-2 fw-semibold text-dark shadow-sm hover-lift" 
-          onClick={copyRoomId}
-          style={{ background: '#ffffff', fontSize: '0.9rem' }}
-        > 
-          {copied ? "✓ Copied!" : "Copy ID"} 
-        </button> 
-
-        <button 
-          className="btn btn-light flex-grow-1 border py-2 fw-semibold text-primary shadow-sm hover-lift d-flex align-items-center justify-content-center gap-1" 
-          onClick={shareRoom}
-          style={{ background: '#ffffff', fontSize: '0.9rem' }}
-        > 
-          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
-            <path d="M13.5 1a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zM11 2.5a2.5 2.5 0 1 1 .603 1.628l-6.718 3.12a2.49 2.49 0 0 1 0 1.504l6.718 3.12a2.5 2.5 0 1 1-.488.876l-6.718-3.12a2.5 2.5 0 1 1 0-3.256l6.718-3.12A2.5 2.5 0 0 1 11 2.5z"/>
-          </svg>
-          Share
-        </button>
-      </div>
-      
-      <button 
-        className="btn btn-primary w-100 border-0 shadow-sm py-2 fw-semibold" 
-        onClick={saveFile} 
-        style={{ background: '#6366f1' }}
-      >
-        Save File
-      </button>
-
-      <button 
-        className="btn btn-link text-danger w-100 border shadow-sm mt-1 py-2 fw-semibold text-decoration-none hover-lift" 
-        onClick={leaveRoom} 
-        style={{ fontSize: '0.9rem' }}
-      > 
-        Leave Room 
-      </button>
-
-    </div>
-  </div>
-
-  {/* In-component CSS for the Scrollbar */}
-  <style>{`
-    .custom-scrollbar-light::-webkit-scrollbar {
-      width: 4px;
-    }
-    .custom-scrollbar-light::-webkit-scrollbar-track {
-      background: transparent;
-    }
-    .custom-scrollbar-light::-webkit-scrollbar-thumb {
-      background: #e2e8f0;
-      border-radius: 10px;
-    }
-    .custom-scrollbar-light::-webkit-scrollbar-thumb:hover {
-      background: #cbd5e1;
-    }
-    .hover-lift:hover {
-      background: #fdfdfd !important;
-      transform: translateY(-1px);
-      transition: all 0.2s;
-    }
-  `}</style>
-</div>
-
-      {/* ---------- MAIN CONTENT AREA ---------- */}
-      <div className="flex-grow-1 d-flex overflow-hidden">
-
-      {/* ---------- MIDDLE COLUMN: EDITOR + CONSOLE ---------- */}
-<div className="flex-grow-1 d-flex flex-column border-end" style={{ minWidth: 0 }}>
-  
-  {/* EDITOR (Top Part - Expands to fill space) */}
-  <div className="flex-grow-1 d-flex flex-column " style={{minHeight:0 ,overflow:"hidden" }}>
-    <Editor
-      code={code}
-      setCode={handleCodeChange}
-      language={language}
-      setLanguage={setLanguage}
-      handleLanguageChange={handleLanguageChange}
-      runCode={runCode}
-      isRunning={isRunning}
-      isRunnable={runnableLanguages.includes(language)}
-      socketRef={socketRef}
-  roomId={roomId}
-  username={username}
-  remoteCursors={remoteCursors}
-    />
-  </div>
-
-  {/* SPLIT CONSOLE (Bottom Part - Fixed Height) */}
-  <div className="bg-white border-top shadow-lg" style={{ height: "250px" }}>
-    <div className="row g-0 h-100">
-      
-      {/* LEFT HALF: INPUT BOX */}
-      <div className="col-6 border-end d-flex flex-column">
-        <div className="px-3 py-2 border-bottom bg-light bg-opacity-50 d-flex justify-content-between align-items-center">
-          <small className="text-uppercase fw-bold text-muted" style={{ fontSize: '0.65rem', letterSpacing: '1px' }}>
-            Input
-          </small>
-        </div>
-        <textarea
-          className="form-control flex-grow-1 border-0 bg-transparent shadow-none p-3"
-          placeholder="Enter standard input here..."
-          value={inputValue}
-          onChange={handleInputChange}
-          style={{ 
-            fontSize: '0.85rem', 
-            fontFamily: "'JetBrains Mono', 'Fira Code', monospace",
-            resize: 'none',
-            lineHeight: '1.5'
-          }}
-        />
-      </div>
-
-      {/* RIGHT HALF: OUTPUT PANEL */}
-      <div
-  className="col-6 d-flex flex-column"
-  style={{
-    background: "#080b12",
-    minHeight: 0,
-    height: "100%"
-  }}
->
-  <div className="px-3 py-2 border-bottom border-secondary border-opacity-25 d-flex justify-content-between align-items-center">
-    <small className="text-uppercase fw-bold " style={{ color: "#efe3e3", fontSize: '0.65rem', letterSpacing: '1px' }}>
-      Terminal Output
-    </small>
-    {isRunning && (
-      <div className="spinner-border spinner-border-sm text-info" role="status"></div>
-    )}
-  </div>
-
-  <div
-    className="flex-grow-1 p-3 custom-scrollbar-dark"
-    style={{
-      color: "#00ff77",
-      overflowY: "auto",
-      overflowX: "auto",
-      fontFamily: "'JetBrains Mono', 'Fira Code', monospace",
-      fontSize: "0.85rem",
-      whiteSpace: "pre-wrap",
-      wordBreak: "break-word",
-      lineHeight: "1.6",
-      minHeight: 0
-    }}
-  >
-    {output ? output : (
-      <span className="text-secondary opacity-50 fst-italic">
-        No output yet. Run code to see results...
-      </span>
-    )}
-  </div>
-
-</div>
-
-    </div>
-  </div>
-</div>
-<style>{`
-  .custom-scrollbar-dark::-webkit-scrollbar {
-    width: 4px;
-  }
-  .custom-scrollbar-dark::-webkit-scrollbar-track {
-    background: transparent;
-  }
-  .custom-scrollbar-dark::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.2);
-    border-radius: 10px;
-  }
-  .custom-scrollbar-dark::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.3);
-  }
-`}</style>
-
-
-  
-        {/* ---------- CHAT PANEL: Modern Floating Style ---------- */}
-        <div 
-          className="bg-white d-flex flex-column border-start shadow-sm"
-          style={{ width: 350, zIndex: 5 }}
-        >
-          {/* Header */}
-          <div 
-  className="p-3 d-flex align-items-center justify-content-between bg-white bg-opacity-75"
-  style={{ 
-    backdropFilter: 'blur(10px)', 
-    borderBottom: '1px solid rgba(0,0,0,0.05)',
-    position: 'sticky',
-    top: 0,
-    zIndex: 10
-  }}
->
-  <div className="d-flex align-items-center gap-3">
-    {/* Modern Gradient Icon */}
-    <div 
-      className="d-flex align-items-center justify-content-center shadow-sm"
-      style={{ 
-        width: '42px', 
-        height: '42px', 
-        borderRadius: '12px',
-        background: 'linear-gradient(135deg, #6366f1 0%, #a855f7 100%)',
-        color: 'white'
-      }}
-    >
-      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
-        <path d="M14 1a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H4.414A2 2 0 0 0 3 11.586l-2 2V2a1 1 0 0 1 1-1zM2 0a2 2 0 0 0-2 2v12.793a.5.5 0 0 0 .854.353l2.853-2.853A1 1 0 0 1 4.414 12H14a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2z"/>
-      </svg>
-    </div>
-
-    {/* Title and Animated Status */}
-    <div>
-      <h6 className="mb-0 fw-bold text-dark" style={{ letterSpacing: '-0.3px', fontSize: '1rem' }}>
-        Room Chat
-      </h6>
-      <div className="d-flex align-items-center gap-2">
-        <div className="position-relative d-flex align-items-center">
-          <span 
-            className="position-absolute rounded-circle bg-success animate-ping" 
-            style={{ width: '8px', height: '8px', opacity: 0.6 }}
-          ></span>
-          <span 
-            className="rounded-circle bg-success" 
-            style={{ width: '8px', height: '8px', position: 'relative' }}
-          ></span>
-        </div>
-        <small className="text-muted fw-medium" style={{ fontSize: '0.75rem' }}>
-          Live Sync Active
-        </small>
-      </div>
-    </div>
-  </div>
-  <style>{`
-    @keyframes ping {
-      75%, 100% {
-        transform: scale(2.5);
-        opacity: 0;
-      }
-    }
-    .animate-ping {
-      animation: ping 2s cubic-bezier(0, 0, 0.2, 1) infinite;
-    }
-  `}</style>
-</div>
-
-          {/* Messages */}
-          <div className="flex-grow-1 overflow-auto p-3 bg-light bg-opacity-50">
-            {messages.map((msg, index) => {
-              const isOwn = msg.username === username;
-              return (
-                <div key={index} className={`d-flex mb-3 ${isOwn ? "justify-content-end" : "justify-content-start"}`}>
-                  <div style={{ maxWidth: "85%" }}>
-                    {!isOwn && (
-                      <small className="fw-bold text-primary ms-1 mb-1 d-block" style={{ fontSize: '0.7rem' }}>
-                        {msg.username}
-                      </small>
-                    )}
-                    <div
-                      className={`px-3 py-2 ${isOwn ? "bg-primary text-white shadow" : "bg-white text-dark border shadow-sm"}`}
-                      style={{ 
-                        borderRadius: isOwn ? '16px 16px 4px 16px' : '16px 16px 16px 4px',
-                        fontSize: '0.9rem'
-                      }}
-                    >
-                      {msg.message}
-                    </div>
-                    <div className={`mt-1 ${isOwn ? "text-end" : "text-start"}`}>
-                      <small className="text-muted" style={{ fontSize: '0.65rem' }}>{msg.time}</small>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-            <div ref={chatEndRef} />
+      {/* ---------- LEFT SIDEBAR: COLLABORATORS & ACTIONS ---------- */}
+      <div className="bg-white d-flex flex-column border-end shadow-sm" style={{ width: 260, zIndex: 10 }}>
+        <div className="p-4 h-100 d-flex flex-column">
+          
+          <div className="text-center mb-4">
+            <img src={Logo} alt="Replicus Logo" style={{ width: 120 }} />
+            <div className="mt-3 bg-light rounded" style={{ height: '2px' }}></div>
           </div>
 
-          {/* Chat Input */}
-          <div className="p-3 bg-white border-top">
-            <div className="input-group bg-light rounded-pill px-2 py-1 align-items-center shadow-inner border">
-              <input
-                type="text"
-                className="form-control border-0 bg-transparent shadow-none py-1"
-                placeholder="Message collaborators..."
-                style={{ fontSize: '0.85rem' }}
-                value={messageInput}
-                onChange={(e) => setMessageInput(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && sendMessage()}
-              />
-              <button 
-                className="btn btn-primary rounded-circle d-flex align-items-center justify-content-center p-0 shadow-sm" 
-                style={{ width: 32, height: 32, background: '#6366f1' }}
-                onClick={sendMessage}
-              >
-                <svg width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
-                  <path d="M15.964.686a.5.5 0 0 0-.65-.65L.767 5.855H.766l-.452.18a.5.5 0 0 0-.082.887l.41.26.001.002 4.995 3.178 3.178 4.995.002.001.26.41a.5.5 0 0 0 .886-.083l6-15Zm-1.833 1.89L6.637 10.07l-.215-.338a.5.5 0 0 0-.154-.154l-.338-.215 7.494-7.494 1.178-.471-.47 1.178Z"/>
-                </svg>
+          <div className="rounded p-3 mb-4 text-center border bg-light">
+            <small className="text-uppercase fw-bold text-muted mb-1 d-block" style={{ fontSize: '0.65rem', letterSpacing: '1px' }}>
+              Secure Session ID
+            </small>
+            <code className="fw-bold" style={{ fontSize: '0.9rem', color: '#2563eb' }}>
+              {roomId}
+            </code>
+          </div>
+
+          <h6 className="d-flex align-items-center gap-2 mb-3 text-dark fw-bold" style={{ fontSize: '0.85rem' }}>
+            <Users size={16} className="text-primary" />
+            Active Pilots 
+            <span className="badge rounded-pill bg-primary bg-opacity-10 text-primary ms-auto">
+              {clients.length}
+            </span>
+          </h6>
+
+          <div className="flex-grow-1 overflow-auto pe-2 custom-scrollbar-light">
+            {[...clients]
+              .sort((a, b) => (a.username === username ? -1 : b.username === username ? 1 : 0))
+              .map(client => (
+                <Client key={client.socketId} username={client.username === username ? `${client.username} (You)` : client.username} />
+            ))}
+          </div>
+
+          <div className="mt-auto d-flex flex-column gap-2 pt-3 border-top">
+            <div className="d-flex gap-2">
+              <button className="btn btn-light flex-grow-1 border py-2 fw-semibold text-dark hover-lift d-flex align-items-center justify-content-center gap-2" onClick={copyRoomId} style={{ fontSize: '0.85rem' }}> 
+                <Copy size={14} /> {copied ? "Copied" : "Copy"} 
+              </button> 
+              <button className="btn btn-light flex-grow-1 border py-2 fw-semibold text-primary hover-lift d-flex align-items-center justify-content-center gap-2" onClick={shareRoom} style={{ fontSize: '0.85rem' }}> 
+                <Share2 size={14} /> Share
               </button>
+            </div>
+            
+            <button className="btn btn-primary w-100 border-0 shadow-sm py-2 fw-semibold d-flex align-items-center justify-content-center gap-2 hover-lift" onClick={saveFile} style={{ background: 'linear-gradient(90deg, #2563eb, #7c3aed)', fontSize: '0.9rem' }}>
+              <Save size={16} /> Export File
+            </button>
+
+            <button className="btn btn-link text-danger w-100 mt-1 py-2 fw-semibold text-decoration-none hover-lift d-flex align-items-center justify-content-center gap-2" onClick={leaveRoom} style={{ fontSize: '0.85rem' }}> 
+              <LogOut size={16} /> Disconnect 
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* ---------- MIDDLE COLUMN: EDITOR & CONSOLE ---------- */}
+      <div className="flex-grow-1 d-flex flex-column overflow-hidden position-relative">
+        
+        {/* Editor Area */}
+        <div className="flex-grow-1 d-flex flex-column" style={{ minHeight: 0 }}>
+          <Editor
+            code={code}
+            setCode={handleCodeChange}
+            language={language}
+            setLanguage={setLanguage}
+            handleLanguageChange={handleLanguageChange}
+            runCode={runCode}
+            isRunning={isRunning}
+            isRunnable={runnableLanguages.includes(language)}
+            socketRef={socketRef}
+            roomId={roomId}
+            username={username}
+            remoteCursors={remoteCursors}
+          />
+        </div>
+
+        {/* Integrated Terminal Panel */}
+        <div className="border-top shadow-lg d-flex flex-column" style={{ height: "280px", background: "#0f172a" }}>
+          
+          {/* Terminal Headers */}
+          <div className="d-flex align-items-center border-bottom border-secondary border-opacity-25" style={{ background: "#020617" }}>
+            <div className="w-50 px-3 py-2 border-end border-secondary border-opacity-25 d-flex align-items-center gap-2">
+              <Terminal size={14} className="text-secondary" />
+              <small className="text-uppercase fw-bold text-secondary" style={{ fontSize: '0.65rem', letterSpacing: '1px' }}>Standard Input</small>
+            </div>
+            <div className="w-50 px-3 py-2 d-flex justify-content-between align-items-center">
+              <div className="d-flex align-items-center gap-2">
+                <Activity size={14} className={isRunning ? "text-info" : "text-success"} />
+                <small className="text-uppercase fw-bold text-light" style={{ fontSize: '0.65rem', letterSpacing: '1px' }}>Terminal Output</small>
+              </div>
+              {isRunning && <Spinner animation="border" size="sm" variant="info" />}
+            </div>
+          </div>
+
+          {/* Terminal Bodies */}
+          <div className="d-flex flex-grow-1 overflow-hidden">
+            
+            {/* Input Box */}
+            <textarea
+              className="w-50 h-100 border-0 shadow-none p-3 border-end border-secondary border-opacity-25"
+              placeholder="Enter runtime inputs here..."
+              value={inputValue}
+              onChange={handleInputChange}
+              style={{ 
+                background: "#1e293b", 
+                color: "#e2e8f0",
+                fontSize: '0.85rem', 
+                fontFamily: "'JetBrains Mono', 'Fira Code', monospace",
+                resize: 'none',
+                outline: 'none'
+              }}
+            />
+
+            {/* Output Box */}
+            <div
+              className="w-50 h-100 p-3 custom-scrollbar-dark"
+              style={{
+                color: "#10b981", // Hacker green
+                background: "transparent",
+                overflowY: "auto",
+                fontFamily: "'JetBrains Mono', 'Fira Code', monospace",
+                fontSize: "0.85rem",
+                whiteSpace: "pre-wrap",
+                wordBreak: "break-word",
+              }}
+            >
+              {output ? output : (
+                <span className="text-secondary opacity-50 fst-italic">
+                  Awaiting execution. Run your code to view results...
+                </span>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ---------- RIGHT SIDEBAR: CHAT ---------- */}
+      <div className="bg-white d-flex flex-column border-start shadow-sm" style={{ width: 320, zIndex: 5 }}>
+        
+        {/* Chat Header */}
+        <div className="p-3 d-flex align-items-center gap-3 bg-white border-bottom" style={{ zIndex: 10 }}>
+          <div className="d-flex align-items-center justify-content-center shadow-sm rounded-3 text-white" style={{ width: '40px', height: '40px', background: 'linear-gradient(135deg, #2563eb, #7c3aed)' }}>
+            <MessageSquare size={18} />
+          </div>
+          <div>
+            <h6 className="mb-0 fw-bold text-dark" style={{ fontSize: '0.95rem' }}>Team Chat</h6>
+            <div className="d-flex align-items-center gap-2 mt-1">
+              <div className="position-relative d-flex align-items-center">
+                <span className="position-absolute rounded-circle bg-success animate-ping" style={{ width: '8px', height: '8px', opacity: 0.6 }}></span>
+                <span className="rounded-circle bg-success position-relative" style={{ width: '8px', height: '8px' }}></span>
+              </div>
+              <small className="text-muted fw-medium" style={{ fontSize: '0.7rem' }}>Secure Sync Active</small>
             </div>
           </div>
         </div>
 
+        {/* Chat Messages */}
+        <div className="flex-grow-1 overflow-auto p-3 custom-scrollbar-light" style={{ background: "#f8fafc" }}>
+          {messages.map((msg, index) => {
+            const isOwn = msg.username === username;
+            return (
+              <div key={index} className={`d-flex mb-3 ${isOwn ? "justify-content-end" : "justify-content-start"}`}>
+                <div style={{ maxWidth: "85%" }}>
+                  {!isOwn && <small className="fw-bold text-primary ms-1 mb-1 d-block" style={{ fontSize: '0.7rem' }}>{msg.username}</small>}
+                  <div
+                    className={`px-3 py-2 shadow-sm ${isOwn ? "text-white" : "bg-white text-dark border"}`}
+                    style={{ 
+                      background: isOwn ? 'linear-gradient(90deg, #2563eb, #4f46e5)' : '#fff',
+                      borderRadius: isOwn ? '16px 16px 4px 16px' : '16px 16px 16px 4px',
+                      fontSize: '0.85rem'
+                    }}
+                  >
+                    {msg.message}
+                  </div>
+                  <div className={`mt-1 ${isOwn ? "text-end" : "text-start"}`}>
+                    <small className="text-muted" style={{ fontSize: '0.65rem' }}>{msg.time}</small>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+          <div ref={chatEndRef} />
+        </div>
+
+        {/* Chat Input */}
+        <div className="p-3 bg-white border-top">
+          <div className="input-group bg-light rounded-pill px-2 py-1 align-items-center border focus-ring-custom transition-all">
+            <input
+              type="text"
+              className="form-control border-0 bg-transparent shadow-none py-2"
+              placeholder="Type a message..."
+              style={{ fontSize: '0.85rem' }}
+              value={messageInput}
+              onChange={(e) => setMessageInput(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && sendMessage()}
+            />
+            <button 
+              className="btn rounded-circle d-flex align-items-center justify-content-center p-0 text-white shadow-sm hover-lift ms-1" 
+              style={{ width: 34, height: 34, background: '#2563eb' }}
+              onClick={sendMessage}
+            >
+              <Send size={14} style={{ marginLeft: '-2px', marginTop: '2px' }} />
+            </button>
+          </div>
+        </div>
+
       </div>
+
+      {/* Global Scoped Styles */}
+      <style>{`
+        .custom-scrollbar-light::-webkit-scrollbar { width: 5px; height: 5px; }
+        .custom-scrollbar-light::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar-light::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .custom-scrollbar-light::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        .custom-scrollbar-dark::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scrollbar-dark::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar-dark::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 10px; }
+        .custom-scrollbar-dark::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.2); }
+
+        .hover-lift { transition: transform 0.2s ease, box-shadow 0.2s ease; }
+        .hover-lift:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.05) !important; }
+
+        .focus-ring-custom:focus-within {
+          border-color: #2563eb !important;
+          box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        @keyframes ping {
+          75%, 100% { transform: scale(2.5); opacity: 0; }
+        }
+        .animate-ping { animation: ping 2s cubic-bezier(0, 0, 0.2, 1) infinite; }
+      `}</style>
+
     </div>
   );
 };
 
-// App Component
 export default function App() {
   return (
     <>
-      <link
-        rel="stylesheet"
-        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-        crossOrigin="anonymous"
-      />
+      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" />
       <Editorpage />
     </>
   );
