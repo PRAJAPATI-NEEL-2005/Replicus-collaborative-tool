@@ -1,4 +1,6 @@
 const express = require("express");
+const RoomLog = require("./models/RoomLog");
+const Chat = require("./models/Chat");
 require("dotenv").config();
 const http = require("http");
 const { Server } = require("socket.io");
@@ -30,6 +32,7 @@ app.use(cors({
   credentials: true
 }));
 app.use('/api/auth', require('./routes/auth'));
+app.use('/api/analytics', require('./routes/analytics'));
 
 //run code api
 app.post("/run", async (req, res) => {
@@ -98,9 +101,18 @@ io.on("connection", (socket) => {
   console.log("socket connected:", socket.id);
 
   //event emitted when user join the room
-  socket.on(Actions.JOIN, ({ roomId, username }) => {
+  socket.on(Actions.JOIN,async ({ roomId, username ,userId, email}) => {
     userSocketMap[socket.id] = username;
     socket.join(roomId);
+
+       await RoomLog.create({
+      roomId,
+      userId,
+      username,
+      email
+    });
+
+     
 
     const clients = getAllConnectedClients(roomId);
 
@@ -158,7 +170,15 @@ io.on("connection", (socket) => {
   });
 
   // Handle chat messages
-  socket.on(Actions.SEND_MESSAGE, ({ roomId, message, username }) => {
+  socket.on(Actions.SEND_MESSAGE, async ({ roomId, message, username, userId, email }) => {
+   await Chat.create({
+    roomId,
+    userId,
+    username,
+    email,
+    message
+  });
+
   io.in(roomId).emit(Actions.RECEIVE_MESSAGE, {
     message,
     username:userSocketMap[socket.id],
