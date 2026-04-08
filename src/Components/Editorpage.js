@@ -12,7 +12,7 @@ const Editorpage = () => {
   const isRemoteUpdate = useRef(false);
   const { roomId } = useParams();
   const location = useLocation();
-  const { username } = location.state || { username: "Anonymous" };
+  const { username,user } = location.state || { username: "Anonymous" };
   const lastToastTimeRef = useRef(0);
   const chatEndRef = useRef(null);
   const socketRef = useRef(null);
@@ -106,7 +106,7 @@ console.log(greet("Developer"));
         reactNavigator("/");
       }
 
-      socketRef.current.emit(Actions.JOIN, { roomId, username });
+      socketRef.current.emit(Actions.JOIN, { roomId, username,userId: user._id,  email: user.email });
 
       socketRef.current.on(Actions.JOINED, ({ clients, username, socketId }) => {
         if (username !== location.state.username) {
@@ -252,7 +252,7 @@ console.log(greet("Developer"));
 
   const sendMessage = () => {
     if (!messageInput.trim()) return;
-    socketRef.current.emit(Actions.SEND_MESSAGE, { roomId, message: messageInput, username });
+    socketRef.current.emit(Actions.SEND_MESSAGE, { roomId, message: messageInput, username ,userId: user._id,  email: user.email});
     setMessageInput("");
   };
 
