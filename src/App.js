@@ -6,6 +6,7 @@ import {Toaster} from 'react-hot-toast';
 import Login from './Components/Login';
 import Signup from './Components/Signup';
 import { useContext } from 'react';
+import AnalyticsDashboard from './Components/AnalyticsDashboard';
 import { AuthContext } from './context/AuthContext';
 function App() {
   const { token } = useContext(AuthContext);
@@ -21,6 +22,10 @@ function App() {
     <BrowserRouter>
       <Routes>
          <Route path="/" element={<Navigate to="/login" />} />
+         <Route 
+            path="/analytics" 
+            element={token ? <AnalyticsDashboard /> : <Navigate to="/login" />} 
+          />
          <Route 
             path="/login" 
             element={!token ? <Login /> : <Navigate to="/home" />} 
