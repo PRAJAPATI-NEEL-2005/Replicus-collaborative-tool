@@ -74,7 +74,7 @@ const confirmLogout = window.confirm("Are you sure you want to log out?");
     socket.emit("check-username", { roomId, username });
     socket.once("username-error", (message) => toast.error(message));
     socket.once("username-ok", () => {
-      navigate(`/editor/${roomId}`, { state: { username } });
+      navigate(`/editor/${roomId}`, { state: { username,user } });
     });
   };
 
