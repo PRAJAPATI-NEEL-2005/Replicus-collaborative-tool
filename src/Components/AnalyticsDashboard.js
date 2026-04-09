@@ -3,7 +3,7 @@ import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid
 } from "recharts";
 import toast from "react-hot-toast";
-import { LayoutDashboard, FolderKanban, Users, X, MessageSquare, Terminal, Activity } from "lucide-react";
+import { LayoutDashboard, FolderKanban, Users, X, MessageSquare, Terminal, Activity,Search, Inbox } from "lucide-react";
 
 const AnalyticsDashboard = () => {
   const [loading, setLoading] = useState(true);
@@ -91,6 +91,12 @@ const AnalyticsDashboard = () => {
     e.stopPropagation();
     setActiveInfo(activeInfo === id ? null : id);
   };
+  // Helper to shorten long IDs for the chart axis
+const formatShortId = (id) => {
+  if (!id) return "";
+  if (id.length <= 4) return id;
+  return `${id.substring(0, 2)}...`; 
+};
 
   const filteredSessions = data.recentSessions.filter(session => {
     const search = searchTerm.toLowerCase();
@@ -164,7 +170,7 @@ const AnalyticsDashboard = () => {
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={data.roomJoins.slice(0, 10)} margin={{ top: 10, right: 10, left: -20, bottom: 20 }}>
                       <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                      <XAxis dataKey="_id" stroke="#94a3b8" fontSize={12} tickLine={false} axisLine={false} label={{ value: "Room ID", position: "insideBottom", offset: -15, fill: "#64748b", fontSize: 12 }} />
+                      <XAxis dataKey="_id" stroke="#94a3b8" fontSize={12} tickLine={false} axisLine={false} tickFormatter={formatShortId} label={{ value: "Room ID", position: "insideBottom", offset: -15, fill: "#64748b", fontSize: 12 }} />
                       <YAxis stroke="#94a3b8" fontSize={12} tickLine={false} axisLine={false} />
                       <Tooltip content={<CustomTooltip />} cursor={{ fill: '#f8fafc' }} />
                       <Bar dataKey="totalUsersJoined" name="Users Joined" fill="#3b82f6" radius={[4, 4, 0, 0]} />
@@ -185,7 +191,7 @@ const AnalyticsDashboard = () => {
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={data.roomVolume} margin={{ top: 10, right: 10, left: -20, bottom: 20 }}>
                       <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                      <XAxis dataKey="_id" stroke="#94a3b8" fontSize={12} tickLine={false} axisLine={false} label={{ value: "Room ID", position: "insideBottom", offset: -15, fill: "#64748b", fontSize: 12 }} />
+                      <XAxis dataKey="_id" stroke="#94a3b8" fontSize={12} tickLine={false} axisLine={false} tickFormatter={formatShortId}  label={{ value: "Room ID", position: "insideBottom", offset: -15, fill: "#64748b", fontSize: 12 }} />
                       <YAxis stroke="#94a3b8" fontSize={12} tickLine={false} axisLine={false} />
                       <Tooltip content={<CustomTooltip />} cursor={{ fill: '#f8fafc' }} />
                       <Bar dataKey="totalMessages" name="Total Messages" fill="#10b981" radius={[4, 4, 0, 0]} />
@@ -206,7 +212,7 @@ const AnalyticsDashboard = () => {
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={data.roomCodeRuns} margin={{ top: 10, right: 10, left: -20, bottom: 20 }}>
                       <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                      <XAxis dataKey="_id" stroke="#94a3b8" fontSize={12} tickLine={false} axisLine={false} label={{ value: "Room ID", position: "insideBottom", offset: -15, fill: "#64748b", fontSize: 12 }} />
+                      <XAxis dataKey="_id" stroke="#94a3b8" fontSize={12} tickLine={false} axisLine={false} tickFormatter={formatShortId}  label={{ value: "Room ID", position: "insideBottom", offset: -15, fill: "#64748b", fontSize: 12 }} />
                       <YAxis stroke="#94a3b8" fontSize={12} tickLine={false} axisLine={false} />
                       <Tooltip content={<CustomTooltip />} cursor={{ fill: '#f8fafc' }} />
                       <Bar dataKey="totalRuns" name="Code Executions" fill="#f97316" radius={[4, 4, 0, 0]} />
@@ -223,7 +229,6 @@ const AnalyticsDashboard = () => {
           <div className="fade-in tables-grid">
             <div className="table-card">
               <h6 className="card-heading">Top Rooms by Joins</h6>
-              <p className="text-muted small mb-3">Click a row to view user activity</p>
               <div className="table-responsive" style={{ maxHeight: "500px", overflowY: "auto" }}>
                 <table className="data-table">
                   <thead><tr><th>Room ID</th><th className="text-right">Total Joins</th></tr></thead>
@@ -241,7 +246,6 @@ const AnalyticsDashboard = () => {
 
             <div className="table-card">
               <h6 className="card-heading">Top Rooms by Messages</h6>
-              <p className="text-muted small mb-3">Click a row to view user activity</p>
               <div className="table-responsive" style={{ maxHeight: "500px", overflowY: "auto" }}>
                 <table className="data-table">
                   <thead><tr><th>Room ID</th><th className="text-right">Total Messages</th></tr></thead>
@@ -259,7 +263,6 @@ const AnalyticsDashboard = () => {
 
             <div className="table-card">
               <h6 className="card-heading">Top Rooms by Code Runs</h6>
-              <p className="text-muted small mb-3">Click a row to view user activity</p>
               <div className="table-responsive" style={{ maxHeight: "500px", overflowY: "auto" }}>
                 <table className="data-table">
                   <thead><tr><th>Room ID</th><th className="text-right">Total Executions</th></tr></thead>
@@ -277,59 +280,94 @@ const AnalyticsDashboard = () => {
           </div>
         );
 
-      case "sessions":
+     case "sessions":
         return (
-          <div className="fade-in table-card user-activity-card" style={{ minHeight: "60vh" }}>
-            <div className="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
-              <h6 className="card-heading no-border mb-0 d-flex align-items-center gap-2">
-                Audit Log
-                <span className="badge bg-light text-dark border fw-normal py-1 px-2">Click row to drill down</span>
-              </h6>
-              <div className="search-wrapper">
-                <input 
-                  type="text" 
-                  className="dashboard-search-input" 
-                  placeholder="Filter by user, email, or room..." 
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
+          <div className="fade-in session-container">
+            <div className="table-card">
+              
+              {/* TOP HEADER & SEARCH */}
+              <div className="session-header">
+                <div className="session-title-group">
+                  <h6 className="card-heading no-border mb-0">Audit Log</h6>
+                  <span className="info-badge">Interactive</span>
+                </div>
+                
+                <div className="search-box">
+                  <Search size={16} className="search-icon" />
+                  <input 
+                    type="text" 
+                    className="search-input-with-icon" 
+                    placeholder="Search users, emails, or rooms..." 
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                  />
+                </div>
               </div>
-            </div>
-            
-            <div className="table-responsive" style={{ maxHeight: "60vh", overflowY: "auto" }}>
-              <table className="data-table">
-                <thead>
-                  <tr>
-                    <th>Date & Time</th>
-                    <th>Pilot (User)</th>
-                    <th>Room ID</th>
-                    <th className="text-right">Messages Sent</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredSessions.map((session, i) => (
-                    <tr key={i} onClick={() => fetchRoomActivity(session.roomId)} className="clickable-row">
-                      <td>
-                        <div className="fw-semibold text-dark">{new Date(session.joinedAt).toLocaleDateString()}</div>
-                        <div className="text-muted small">{new Date(session.joinedAt).toLocaleTimeString()}</div>
-                      </td>
-                      <td>
-                        <div className="fw-semibold text-dark">{session.username || "Anonymous"}</div>
-                        {session.email && <div className="text-muted small">{session.email}</div>}
-                      </td>
-                      <td><span className="code-badge">{session.roomId}</span></td>
-                      <td className="text-right fw-bold text-green">{session.messagesSent || 0}</td>
+              
+              {/* TABLE AREA */}
+              <div className="table-responsive session-table-wrapper">
+                <table className="data-table">
+                  <thead>
+                    <tr>
+                      <th>User Details</th>
+                      <th>Session Date</th>
+                      <th>Workspace ID</th>
+                      <th className="text-right">Activity</th>
                     </tr>
-                  ))}
-                  {filteredSessions.length === 0 && (
-                    <tr><td colSpan="4" className="text-center py-5 text-muted">No sessions found matching your criteria.</td></tr>
-                  )}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {filteredSessions.map((session, i) => {
+                      // Get first letter of username for avatar
+                      const initial = (session.username || "A").charAt(0).toUpperCase();
+                      
+                      return (
+                        <tr key={i} onClick={() => fetchRoomActivity(session.roomId)} className="clickable-row">
+                          <td>
+                            <div className="user-cell">
+                              <div className="user-avatar">{initial}</div>
+                              <div>
+                                <div className="fw-semibold text-dark">{session.username || "Anonymous"}</div>
+                                {session.email && <div className="text-muted small">{session.email}</div>}
+                              </div>
+                            </div>
+                          </td>
+                          <td>
+                            <div className="fw-semibold text-dark">{new Date(session.joinedAt).toLocaleDateString()}</div>
+                            <div className="text-muted small">{new Date(session.joinedAt).toLocaleTimeString()}</div>
+                          </td>
+                          <td>
+                            <span className="code-badge shadow-sm">{session.roomId}</span>
+                          </td>
+                          <td className="text-right">
+                             <div className="activity-stat">
+                                <MessageSquare size={14} className="text-muted"/>
+                                <span className="fw-bold text-green">{session.messagesSent || 0}</span>
+                             </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                    
+                    {/* EMPTY STATE */}
+                    {filteredSessions.length === 0 && (
+                      <tr>
+                        <td colSpan="4">
+                          <div className="empty-state">
+                             <Inbox size={40} className="empty-icon" />
+                             <p className="fw-semibold text-dark mt-2 mb-1">No sessions found</p>
+                             <p className="text-muted small">We couldn't find anything matching "{searchTerm}"</p>
+                          </div>
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         );
-      default: return null;
+      
+        default: return null;
     }
   };
 
@@ -340,7 +378,7 @@ const AnalyticsDashboard = () => {
         {/* HEADER & NAVBAR */}
         <div className="dashboard-header-wrapper">
           <header className="dashboard-header">
-            <h2 className="dashboard-title"><Activity className="title-icon"/> System Analytics</h2>
+            <h2 className="dashboard-title"><Activity className="title-icon"/> Replicus System Analytics</h2>
             <p className="dashboard-subtitle">Monitor platform performance, rooms, and code executions</p>
           </header>
 
@@ -563,6 +601,45 @@ const AnalyticsDashboard = () => {
           .modal-body { padding: 1rem; }
           .modal-header { padding: 1rem; }
         }
+          /* 🔥 NEW SESSIONS UI STYLES */
+        .session-container { display: flex; flex-direction: column; height: 100%; }
+        
+        .session-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1rem; padding-bottom: 1.5rem; border-bottom: 1px solid #f1f5f9; }
+        .session-title-group { display: flex; align-items: center; gap: 0.75rem; }
+        .info-badge { background: #eff6ff; color: #2563eb; font-size: 0.7rem; font-weight: 600; padding: 0.25rem 0.5rem; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.05em; border: 1px solid #bfdbfe; }
+        
+        /* Modern Search Input */
+        .search-box { position: relative; width: 50%; max-width: 400px; }
+        .search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #94a3b8; pointer-events: none; }
+.search-input-with-icon { 
+  width: 100%; 
+  box-sizing: border-box; /* 🔥 THIS FIXES THE OVERFLOW */
+  padding: 0.6rem 1rem 0.6rem 2.5rem; 
+  border-radius: 8px; 
+  border: 1px solid #cbd5e1; 
+  font-size: 0.875rem; 
+  outline: none; 
+  transition: all 0.2s; 
+  background: #fff; 
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05); 
+}        .search-input-with-icon:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15); }
+        
+        /* Table Enhancements */
+        .session-table-wrapper { border-radius: 8px; border: 1px solid #e2e8f0; max-height: 60vh; overflow-y: auto; background: #fff; }
+        .session-table-wrapper thead th { background: #f8fafc; border-bottom: 2px solid #e2e8f0; position: sticky; top: 0; z-index: 10; }
+        
+        /* User Avatar Cell */
+        .user-cell { display: flex; align-items: center; gap: 1rem; }
+        .user-avatar { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, #3b82f6, #8b5cf6); color: white; display: flex; justify-content: center; align-items: center; font-weight: 700; font-size: 0.9rem; flex-shrink: 0; box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2); }
+        
+        .activity-stat { display: flex; align-items: center; justify-content: flex-end; gap: 0.4rem; }
+        .shadow-sm { box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+        
+        /* Empty State */
+        .empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 4rem 2rem; color: #64748b; }
+        .empty-icon { color: #cbd5e1; }
+        .mt-2 { margin-top: 0.5rem; }
+        .mb-1 { margin-bottom: 0.25rem; }
       `}</style>
     </div>
   );
