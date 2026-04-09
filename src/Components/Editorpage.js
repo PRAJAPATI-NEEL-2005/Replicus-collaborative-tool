@@ -58,7 +58,7 @@ const Editorpage = () => {
       const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/run`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ language, code, input: inputValue }),
+        body: JSON.stringify({ language, code, input: inputValue,roomId: roomId, userId: user?._id || null, username: username,email: user?.email || null }),
       });
 
       const data = await response.json();
