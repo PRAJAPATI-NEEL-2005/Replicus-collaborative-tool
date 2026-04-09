@@ -1,6 +1,7 @@
 const express = require("express");
 const RoomLog = require("./models/RoomLog");
 const Chat = require("./models/Chat");
+const CodeRunLog = require("./models/CodeRunLog");
 require("dotenv").config();
 const http = require("http");
 const { Server } = require("socket.io");
@@ -36,7 +37,7 @@ app.use('/api/analytics', require('./routes/analytics'));
 
 //run code api
 app.post("/run", async (req, res) => {
-  const { code, language, input } = req.body;
+  const { code, language, input ,roomId, userId, username, email} = req.body;
 
   try {
     // Map your frontend language to JDoodle format
@@ -61,6 +62,19 @@ app.post("/run", async (req, res) => {
  return res.status(400).json({ 
     error: `${language.toUpperCase()} cannot be executed.`
   });    }
+
+      if (roomId && username) {
+      await CodeRunLog.create({
+        roomId,
+        userId,
+        username,
+        email,
+        language
+      });
+    }
+
+
+
 
     const response = await axios.post(
       "https://api.jdoodle.com/v1/execute",
