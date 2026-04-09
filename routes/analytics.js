@@ -167,4 +167,49 @@ router.get("/rooms/:roomId/code-activity", async (req, res) => {
   }
 });
 
+// ==============================
+// 7. RECENT USER SESSIONS LOG
+// ==============================
+// Returns a detailed list of who joined what room, when, and their activity
+router.get("/recent-sessions", async (req, res) => {
+  try {
+    const sessions = await Room.aggregate([
+      { $sort: { joinedAt: -1, createdAt: -1 } }, // Newest first (handles either joinedAt or createdAt fields)
+      { $limit: 100 }, // Keep the list manageable (last 100 sessions)
+      {
+        $lookup: {
+          from: "chats", // Your chats collection
+          let: { roomId: "$roomId", userId: "$userId" },
+          pipeline: [
+            { 
+              $match: {
+                $expr: { 
+                  $and: [
+                    { $eq: ["$roomId", "$$roomId"] },
+                    { $eq: ["$userId", "$$userId"] }
+                  ]
+                }
+              }
+            }
+          ],
+          as: "userChats"
+        }
+      },
+      {
+        $project: {
+          roomId: 1,
+          username: 1,
+          email: 1,
+          joinedAt: { $ifNull: ["$joinedAt", "$createdAt"] }, // Fallback in case your schema uses createdAt
+          messagesSent: { $size: "$userChats" }
+        }
+      }
+    ]);
+
+    res.json(sessions);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 module.exports = router;
