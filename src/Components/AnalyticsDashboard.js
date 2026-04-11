@@ -3,13 +3,13 @@ import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid
 } from "recharts";
 import toast from "react-hot-toast";
-import { LayoutDashboard, FolderKanban, Users, X, MessageSquare, Terminal, Activity,Search, Inbox } from "lucide-react";
-
+import { LayoutDashboard, FolderKanban, Users, X, MessageSquare, Terminal, Activity,Search, Inbox,Home } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 const AnalyticsDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("overview"); // 🔥 NEW: Navigation state
   const [activeInfo, setActiveInfo] = useState(null);
-  
+  const navigate = useNavigate();
   // State for all dashboard endpoints
   const [data, setData] = useState({
     overview: { totalUsers: 0, totalRooms: 0, totalMessages: 0, totalCodeRuns: 0 },
@@ -377,10 +377,17 @@ const formatShortId = (id) => {
         
         {/* HEADER & NAVBAR */}
         <div className="dashboard-header-wrapper">
-          <header className="dashboard-header">
-            <h2 className="dashboard-title"><Activity className="title-icon"/> Replicus System Analytics</h2>
-            <p className="dashboard-subtitle">Monitor platform performance, rooms, and code executions</p>
-          </header>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: "1rem" }}>
+            <header className="dashboard-header">
+              <h2 className="dashboard-title"><Activity className="title-icon"/> Replicus System Analytics</h2>
+              <p className="dashboard-subtitle">Monitor platform performance, rooms, and code executions</p>
+            </header>
+
+            {/* 🔥 NEW RETURN HOME BUTTON */}
+            <button className="return-home-btn" onClick={() => navigate("/home")}>
+              <Home size={18} /> Go to Workspace
+            </button>
+          </div>
 
           <nav className="dashboard-nav">
             <button 
@@ -640,6 +647,31 @@ const formatShortId = (id) => {
         .empty-icon { color: #cbd5e1; }
         .mt-2 { margin-top: 0.5rem; }
         .mb-1 { margin-bottom: 0.25rem; }
+
+        /* 🔥 Return Home Button */
+        .return-home-btn {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          background: #fff;
+          border: 1px solid #cbd5e1;
+          padding: 8px 16px;
+          border-radius: 8px;
+          font-size: 0.9rem;
+          font-weight: 600;
+          color: #0751ff;
+          cursor: pointer;
+          transition: all 0.2s ease;
+          box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+        
+        .return-home-btn:hover {
+          background: #0080ff;
+          border-color: #48525f;
+          color: #f8f8f8;
+          transform: translateY(-1px);
+          box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
       `}</style>
     </div>
   );
