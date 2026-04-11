@@ -140,12 +140,17 @@ router.post('/login', async (req, res) => {
     }
 
     const data = {
-      user: { id: user.id }
+      user: { id: user.id,role: user.role }
     };
 
     const token = jwt.sign(data, JWT_SECRET);
 
-    res.json({ token });
+    res.json({ token ,user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        role: user.role // React needs this!
+      }});
 
   } catch (err) {
     res.status(500).send("Server Error");
