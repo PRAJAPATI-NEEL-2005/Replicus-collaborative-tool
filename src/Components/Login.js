@@ -50,9 +50,21 @@ const Login = () => {
       const data = await res.json();
 
       if (res.ok && data.token) {
+        // 1. Log the user in via Context
         login(data.token);
+        
+        // 2. 🔥 Extract and store the role (default to "user" if undefined)
+        const userRole = data.user?.role || "user";
+        localStorage.setItem("role", userRole);
+
         toast.success("Welcome back to Replicus! 🚀");
-        navigate("/home");
+        
+        // 3. 🔥 ROLE-BASED ROUTING
+        if (userRole === "admin") {
+          navigate("/analytics"); // Admins go to the dashboard
+        } else {
+          navigate("/home");      // Normal users go to the workspace/home
+        }
       } else {
         toast.error(data.error || "Invalid credentials");
       }
