@@ -20,7 +20,7 @@ const Login = () => {
 
   // Multi-step state: 1 = Login, 2 = Forgot Pass Email, 3 = Verify OTP, 4 = Reset Pass
   const [step, setStep] = useState(1); 
-  
+  const baseUrl = process.env.REACT_APP_BACKEND_URL; // Base URL for API calls
   // Form states
   const [form, setForm] = useState({ email: "", password: "" });
   const [resetEmail, setResetEmail] = useState("");
@@ -41,7 +41,7 @@ const Login = () => {
 
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:5000/api/auth/login", {
+      const res = await fetch(`${baseUrl}/api/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form)
@@ -85,7 +85,7 @@ const Login = () => {
 
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:5000/api/auth/forgot-password", {
+      const res = await fetch(`${baseUrl}/api/auth/forgot-password`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: resetEmail })
@@ -115,7 +115,7 @@ const Login = () => {
 
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:5000/api/auth/verify-reset-otp", {
+      const res = await fetch(`${baseUrl}/api/auth/verify-reset-otp`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: resetEmail, otp })
@@ -145,7 +145,7 @@ const Login = () => {
 
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:5000/api/auth/reset-password", {
+      const res = await fetch(`${baseUrl}/api/auth/reset-password`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: resetEmail, newPassword })
