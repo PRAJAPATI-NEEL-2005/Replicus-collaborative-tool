@@ -16,7 +16,7 @@ const fadeInUp = {
 
 const Signup = () => {
   const navigate = useNavigate();
-
+const baseUrl = process.env.REACT_APP_BACKEND_URL; // Base URL for API calls
   // Multi-step form state
   const [step, setStep] = useState(1); 
   const [form, setForm] = useState({ name: "", email: "", password: "" });
@@ -35,7 +35,7 @@ const Signup = () => {
 
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:5000/api/auth/signup", {
+      const res = await fetch(`${baseUrl}/api/auth/signup`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form)
@@ -66,7 +66,7 @@ const Signup = () => {
 
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:5000/api/auth/verify-otp", {
+      const res = await fetch(`${baseUrl}/api/auth/verify-otp`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: form.email, otp })
