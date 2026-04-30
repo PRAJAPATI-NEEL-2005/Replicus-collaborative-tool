@@ -10,7 +10,7 @@ import { AuthContext } from "../context/AuthContext";
 import logo from "./logo.png";
 
 const socket = io(process.env.REACT_APP_BACKEND_URL || "http://localhost:5000");
-
+const baseUrl = process.env.REACT_APP_BACKEND_URL || "http://localhost:5000"; // Base URL for API calls
 // Animation Variants
 const fadeInUp = {
   initial: { y: 20, opacity: 0 },
@@ -32,7 +32,7 @@ function Home() {
     if (!token) { navigate("/login"); return; }
 
     try {
-      const res = await fetch("http://localhost:5000/api/auth/getuser", {
+      const res = await fetch(`${baseUrl}/api/auth/getuser`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
