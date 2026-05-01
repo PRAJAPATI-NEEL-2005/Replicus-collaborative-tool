@@ -4,7 +4,6 @@ import Home from './Components/Home';
 import Editorpage from './Components/Editorpage';
 import { Toaster } from 'react-hot-toast';
 import Login from './Components/Login';
-import Signup from './Components/Signup';
 import { useContext } from 'react';
 import AnalyticsDashboard from './Components/AnalyticsDashboard';
 import { AuthContext } from './context/AuthContext';
@@ -49,10 +48,7 @@ function App() {
             path="/login" 
             element={!token ? <Login /> : <Navigate to={defaultDashboard} />} 
           />
-          <Route 
-            path="/signup" 
-            element={!token ? <Signup /> : <Navigate to={defaultDashboard} />} 
-          />
+          
 
           {/* NORMAL USER ROUTES */}
           <Route 
