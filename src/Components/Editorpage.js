@@ -313,7 +313,7 @@ console.log(greet("Developer"));
             {[...clients]
               .sort((a, b) => (a.username === username ? -1 : b.username === username ? 1 : 0))
               .map(client => (
-                <Client key={client.socketId} username={client.username === username ? `${client.username} (You)` : client.username} />
+                <Client key={client.socketId} username={client.username === username ? `${client.username}(You)` : client.username} />
             ))}
           </div>
 
