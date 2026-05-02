@@ -309,13 +309,17 @@ console.log(greet("Developer"));
             </span>
           </h6>
 
-          <div className="flex-grow-1 overflow-auto pe-2 custom-scrollbar-light">
-            {[...clients]
-              .sort((a, b) => (a.username === username ? -1 : b.username === username ? 1 : 0))
-              .map(client => (
-                <Client key={client.socketId} username={client.username === username ? `${client.username}(You)` : client.username} />
-            ))}
-          </div>
+     <div className="flex-grow-1 overflow-auto pe-2 custom-scrollbar-light">
+  {[...clients]
+    .sort((a, b) => (a.username === username ? -1 : b.username === username ? 1 : 0))
+    .map((client) => (
+      <Client 
+        key={client.socketId} 
+        username={client.username} 
+        isSelf={client.username === username} // Pass a boolean flag instead of modifying the string
+      />
+  ))}
+</div>
 
           <div className="mt-auto d-flex flex-column gap-2 pt-3 border-top">
             <div className="d-flex gap-2">
