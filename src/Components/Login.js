@@ -65,13 +65,19 @@ const Login = () => {
       const data = await res.json();
 
       if (res.ok && data.token) {
-        login(data.token);
-        const userRole = data.user?.role || "user";
-        localStorage.setItem("role", userRole);
-        toast.success("Welcome back to Replicus! 🚀");
-        if (userRole === "admin") navigate("/analytics"); 
-        else navigate("/home");      
-      } else {
+  login(data.token);
+
+  localStorage.setItem("user", JSON.stringify(data.user));
+  localStorage.setItem("role", data.user.role);
+
+  toast.success("Welcome back to Replicus! 🚀");
+
+  if (data.user.role === "admin") {
+    navigate("/analytics");
+  } else {
+    navigate("/home");
+  }
+}else {
         toast.error(data.error || "Invalid credentials");
       }
     } catch (err) { toast.error("Server connection failed"); } 
