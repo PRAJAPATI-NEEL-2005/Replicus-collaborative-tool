@@ -24,36 +24,24 @@ function Home() {
 
   const [roomId, setRoomId] = useState("");
   const [username, setUsername] = useState("");
-  const [user, setUser] = useState(null); 
+const [user, setUser] = useState(() => {
+  const storedUser = localStorage.getItem("user");
+  return storedUser ? JSON.parse(storedUser) : null;
+});
   const [loading, setLoading] = useState(true);
 
-  const getUser = async () => {
-    const token = localStorage.getItem("token");
-    if (!token) { navigate("/login"); return; }
+  useEffect(() => {
+  const token = localStorage.getItem("token");
 
-    try {
-      const res = await fetch(`${baseUrl}/api/auth/getuser`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "auth-token": token 
-        }
-      });
-      const data = await res.json();
-      if (res.ok) {
-        setUser(data);
-        setUsername(data.name); 
-      } else {
-        handleLogout();
-      }
-    } catch (err) {
-      toast.error("Connection failed");
-    } finally {
-      setLoading(false);
-    }
-  };
+  if (!token || !user) {
+    navigate("/login");
+    return;
+  }
 
-  useEffect(() => { getUser(); }, []);
+  setUsername(user.name);
+}, [navigate, user]);
+
+
 
   const handleLogout = () => {
 const confirmLogout = window.confirm("Are you sure you want to log out?");
