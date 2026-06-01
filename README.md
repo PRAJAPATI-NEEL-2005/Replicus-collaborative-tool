@@ -8,7 +8,7 @@ It is designed to simulate a live coding interview / pair programming environmen
 
 ## 🌐 Live Demo
 
-- 🔗 Frontend: https://replicus-collaborative-tool.vercel.app  
+- 🔗 REPLICUS: https://replicus-collaborative-tool.vercel.app  
 
 ---
 
