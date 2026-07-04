@@ -1,4 +1,6 @@
 import React, { useEffect, useRef } from "react";
+import { Play, FileCode2, Code2, Loader2, Volume2, VolumeX } from "lucide-react";
+import { useState} from "react"; // Ensure useState is imported
 import { basicSetup } from "codemirror";
 import { EditorView, Decoration, WidgetType } from "@codemirror/view";
 import { EditorState, Compartment, StateField, StateEffect } from "@codemirror/state";
@@ -14,7 +16,6 @@ import { php } from "@codemirror/lang-php";
 import { json } from "@codemirror/lang-json";
 import { xml } from "@codemirror/lang-xml";
 
-import { Play, FileCode2, Code2, Loader2 } from "lucide-react"; // 🔥 Added Icons
 import Actions from "../Actions";
 
 // 🔥 Remote Cursor Setup
@@ -104,9 +105,52 @@ const Editor = ({
   code, setCode, language, handleLanguageChange, runCode, isRunning, socketRef, roomId, remoteCursors,
 }) => {
 
+
+
   const editorRef = useRef(null);
   const viewRef = useRef(null);
   const languageCompartment = useRef(new Compartment());
+
+
+const [soundEnabled, setSoundEnabled] = useState(false);
+const audioCtxRef = useRef(null);
+
+/// 🎹 Synthesize a loud, sharp typewriter "tap"
+const playKeystrokeSound = () => {
+  if (!soundEnabled) return;
+
+  // Initialize AudioContext on first user interaction
+  if (!audioCtxRef.current) {
+    audioCtxRef.current = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  
+  const ctx = audioCtxRef.current;
+  if (ctx.state === "suspended") ctx.resume();
+
+  // Create oscillator and gain (volume) nodes
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+
+  osc.connect(gain);
+  gain.connect(ctx.destination);
+
+  // 1. WAVEFORM: 'square' produces a harsh, mechanical edge perfect for clicks
+  osc.type = "square"; 
+  
+  // 2. PITCH: Start high (800Hz) so it cuts through laptop speakers, drop rapidly
+  osc.frequency.setValueAtTime(800, ctx.currentTime);
+  osc.frequency.exponentialRampToValueAtTime(100, ctx.currentTime + 0.02);
+
+  // 3. VOLUME: Cranked up to 0.8 (80% max volume)
+  gain.gain.setValueAtTime(0.8, ctx.currentTime); 
+  // Fast decay ensures it sounds like a short tap, not a long beep
+  gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.04);
+
+  // Play and cleanup
+  osc.start(ctx.currentTime);
+  osc.stop(ctx.currentTime + 0.05);
+};
+
 
   const getLanguageExtension = (lang) => {
     const extensions = {
@@ -226,7 +270,15 @@ const Editor = ({
 
         {/* Right Side: Controls */}
         <div className="d-flex align-items-center gap-3">
-          
+          {/* Sound Toggle Button */}
+<button
+  className="btn btn-outline-secondary btn-sm d-flex align-items-center justify-content-center p-1"
+  onClick={() => setSoundEnabled(!soundEnabled)}
+  title={soundEnabled ? "Mute typing sounds" : "Enable typing sounds"}
+  style={{ width: "32px", height: "32px", borderRadius: "8px" }}
+>
+  {soundEnabled ? <Volume2 size={16} /> : <VolumeX size={16} />}
+</button>
           {/* Language Selector */}
           <div className="d-flex align-items-center gap-2 bg-white border rounded px-2 py-1 shadow-sm">
             <Code2 size={14} className="text-muted" />
@@ -275,13 +327,17 @@ const Editor = ({
       {/* The parent must have flex-grow-1 AND minHeight: 0 so it doesn't push the terminal down.
         CodeMirror's internal styling (editorLayoutTheme) handles the actual scrolling.
       */}
-      <div className="flex-grow-1 position-relative" style={{ minHeight: 0, background: "#ffffff" }}>
-        <div
-          ref={editorRef}
-          className="h-100 w-100"
-          style={{ fontSize: "14px" }}
-        />
-      </div>
+  <div 
+  className="flex-grow-1 position-relative" 
+  style={{ minHeight: 0, background: "#ffffff" }}
+  onKeyDown={playKeystrokeSound} // 🔥 The trigger is here
+>
+  <div
+    ref={editorRef}
+    className="h-100 w-100"
+    style={{ fontSize: "14px" }}
+  />
+</div>
 
       {/* Custom Styles for Spinners and Buttons */}
       <style>{`
